@@ -10,3 +10,11 @@ const root = document.getElementById("root") as HTMLElement;
 ReactDOM.createRoot(root).render(
   <RouterProvider router={router} />
 );
+
+// Register service worker for PWA support
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js");
+  });
+}
+
