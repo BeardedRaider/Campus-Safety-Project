@@ -1,6 +1,7 @@
 import LandingHeader from "../components/landing/LandingHeader";
 import LandingHero from "../components/landing/LandingHero";
 import LandingValueProps from "../components/landing/LandingValueProps";
+import LandingOffers from "../components/landing/LandingOffers";
 
 export default function LandingPage() {
   return (
@@ -8,7 +9,8 @@ export default function LandingPage() {
       <LandingHeader />
       <LandingHero />
       <LandingValueProps />
-
+      <LandingOffers />
+      
       {/* Temporary placeholder until I build the next components */}
       <div className="p-4">
         <p className="text-gray-400">Landing page content coming soon...</p>
