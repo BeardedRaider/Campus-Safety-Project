@@ -27,7 +27,7 @@ export default function BottomNav() {
     >
       {/* ---------------- HOME ---------------- */}
       <NavLink
-        to="/"
+        to="/app"
         className={({ isActive }) =>
           `
           flex flex-col items-center text-xs transition
@@ -45,7 +45,7 @@ export default function BottomNav() {
 
       {/* ---------------- CONTACTS ---------------- */}
       <NavLink
-        to="/contacts"
+        to="/app/contacts"
         className={({ isActive }) =>
           `
           flex flex-col items-center text-xs transition
@@ -63,7 +63,7 @@ export default function BottomNav() {
 
       {/* ---------------- CHECK-INS ---------------- */}
       <NavLink
-        to="/checkins"
+        to="/app/check-ins"
         className={({ isActive }) =>
           `
           flex flex-col items-center text-xs transition
@@ -81,7 +81,7 @@ export default function BottomNav() {
 
       {/* ---------------- SETTINGS ---------------- */}
       <NavLink
-        to="/settings"
+        to="/app/settings"
         className={({ isActive }) =>
           `
           flex flex-col items-center text-xs transition
