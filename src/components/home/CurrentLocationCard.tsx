@@ -1,0 +1,47 @@
+// -------------------------------------------------------------
+// Component: CurrentLocationCard
+// Purpose: Display current tracking status + coordinates.
+// -------------------------------------------------------------
+
+import { MapPin } from "lucide-react";
+
+interface Props {
+  isTracking: boolean;
+  position: GeolocationPosition | null;
+  lastUpdated: string | null;
+}
+
+export default function CurrentLocationCard({
+  isTracking,
+  position,
+  lastUpdated,
+}: Props) {
+  return (
+    <div className="bg-[#111] rounded-xl p-4 mt-6 shadow-md">
+      <div className="flex items-center gap-2 mb-2">
+        <MapPin size={18} className="text-cyan-300" />
+        <h2 className="text-lg font-semibold">Current Location</h2>
+      </div>
+
+      <p
+        className={`text-sm ${isTracking ? "text-green-400" : "text-red-400"}`}
+      >
+        {isTracking ? "Active" : "Inactive"}
+      </p>
+
+      <div className="mt-2 text-sm text-gray-300">
+        <p>
+          <span className="text-gray-400">Coordinates:</span>{" "}
+          {position
+            ? `${position.coords.latitude.toFixed(6)}, ${position.coords.longitude.toFixed(6)}`
+            : "N/A"}
+        </p>
+
+        <p className="mt-1">
+          <span className="text-gray-400">Last updated:</span>{" "}
+          {lastUpdated || "N/A"}
+        </p>
+      </div>
+    </div>
+  );
+}

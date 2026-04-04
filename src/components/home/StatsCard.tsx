@@ -1,12 +1,6 @@
 // -------------------------------------------------------------
 // Component: StatsCard
 // Purpose: Reusable stat tile with icon, value, and label.
-//
-// This component:
-// - Displays a Lucide icon above the text
-// - Uses accent colours for visual hierarchy
-// - Auto-sizes based on content (Option B)
-// - Matches wireframe layout
 // -------------------------------------------------------------
 
 import type { ReactNode } from "react";
@@ -15,7 +9,7 @@ interface StatsCardProps {
   icon: ReactNode;
   value: string | number;
   label: string;
-  color: string; // Tailwind colour class
+  color: string;
 }
 
 export default function StatsCard({
@@ -29,16 +23,19 @@ export default function StatsCard({
       className="
         flex flex-col items-center 
         bg-[#111] rounded-xl 
-        px-4 py-3 
+        px-3 py-2 
         shadow-md 
-        min-w-22.5
+        min-w-20
+        shrink
       "
     >
       <div className={`mb-1 ${color}`}>{icon}</div>
 
-      <p className="text-2xl font-semibold">{value}</p>
+      <p className="text-lg font-semibold">{value}</p>
 
-      <p className="text-xs text-gray-400 mt-1">{label}</p>
+      <p className="text-[10px] text-gray-400 mt-1 text-center leading-tight">
+        {label}
+      </p>
     </div>
   );
 }

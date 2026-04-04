@@ -2,10 +2,11 @@
 // Component: StatsGrid
 // Purpose: Layout wrapper for the three stat cards.
 //
-// This component:
-// - Uses flexbox with gap for natural spacing
-// - Allows auto-width cards (Option B)
-// - Wraps gracefully on small screens
+// This version:
+// - Centers cards
+// - Allows natural auto-width sizing
+// - Wraps cleanly on small screens
+// - Matches wireframe spacing
 // -------------------------------------------------------------
 
 import StatsCard from "./StatsCard";
@@ -13,7 +14,7 @@ import { CheckCircle, Clock, Users } from "lucide-react";
 
 export default function StatsGrid() {
   return (
-    <div className="flex gap-3 justify-between flex-wrap mt-4">
+    <div className="flex flex-wrap justify-center gap-4 mt-4">
       <StatsCard
         icon={<CheckCircle size={22} />}
         value="3"

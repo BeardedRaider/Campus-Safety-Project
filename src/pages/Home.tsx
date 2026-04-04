@@ -5,7 +5,12 @@
 // -------------------------------------------------------------
 
 import PageContainer from "../components/PageContainer";
+import Greeting from "../components/home/Greeting";
 import StatsGrid from "../components/home/StatsGrid";
+import TrackingButtons from "../components/home/TrackingButtons";
+import CurrentLocationCard from "../components/home/CurrentLocationCard";
+import RecentCheckInsPreview from "../components/home/RecentCheckInsPreview";
+import SafetyTip from "../components/home/SafetyTip";
 import { useTracking } from "../hooks/useTracking";
 
 export default function Home() {
@@ -14,39 +19,26 @@ export default function Home() {
 
   return (
     <PageContainer>
-      <h1 className="text-xl font-semibold">Home (Testing Mode)</h1>
+      <Greeting />
 
-      {/* Stats Cards */}
       <StatsGrid />
 
-      {/* Tracking Controls */}
-      <div className="mt-6 flex gap-3">
-        <button
-          onClick={startTracking}
-          className="bg-cyan-600 px-4 py-2 rounded-lg shadow"
-        >
-          Start Tracking
-        </button>
+      <TrackingButtons
+        isTracking={isTracking}
+        startTracking={startTracking}
+        stopTracking={stopTracking}
+      />
 
-        <button
-          onClick={stopTracking}
-          className="bg-red-600 px-4 py-2 rounded-lg shadow"
-        >
-          Stop Tracking
-        </button>
-      </div>
+      <CurrentLocationCard
+        isTracking={isTracking}
+        position={position}
+        lastUpdated={lastUpdated}
+      />
 
-      {/* Debug Output */}
-      <div className="mt-6 text-sm text-gray-300">
-        <p>Tracking: {isTracking ? "Yes" : "No"}</p>
-        <p>Last Updated: {lastUpdated || "N/A"}</p>
+      <RecentCheckInsPreview />
 
-        {position && (
-          <p>
-            Position: {position.coords.latitude}, {position.coords.longitude}
-          </p>
-        )}
-      </div>
+      <SafetyTip />
     </PageContainer>
   );
 }
+
