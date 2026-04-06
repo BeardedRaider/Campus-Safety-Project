@@ -3,41 +3,120 @@
 // Purpose: User authentication entry point.
 // -------------------------------------------------------------
 
+import { useState } from "react";
 import AuthPageWrapper from "../components/auth/AuthPageWrapper";
 import AuthInput from "../components/auth/AuthInput";
 import AuthCard from "../components/auth/AuthCard";
-import { Link } from "react-router-dom";
+import { Mail, Lock } from "lucide-react";
+import { loginUser } from "../services/authService";
 
 export default function Login() {
-  return (
-    <AuthPageWrapper>
-      {/* Reusable App Header */}
+  const [form, setForm] = useState({
+    email: "",
+    password: "",
+  });
 
-      {/* Title + Subtitle */}
-      <div className="mt-6 mb-4">
+  const [errors, setErrors] = useState({
+    email: "",
+    password: "",
+    general: "",
+  });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+
+    // Clear general error when user types again
+    setErrors({ ...errors, general: "" });
+  };
+
+  const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    const newErrors = { email: "", password: "", general: "" };
+    let hasError = false;
+
+    // Basic validation
+    if (!form.email.includes("@")) {
+      newErrors.email = "Enter a valid email.";
+      hasError = true;
+    }
+
+    if (form.password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters.";
+      hasError = true;
+    }
+
+    if (hasError) {
+      setErrors(newErrors);
+      return;
+    }
+
+    // Hardcoded login check
+    const result = loginUser(form.email, form.password);
+
+    if (!result.success) {
+      setErrors({
+        email: " ",
+        password: " ",
+        general: result.message,
+      });
+      return;
+    }
+
+    // Successful login
+    localStorage.setItem("user", JSON.stringify(result.user));
+    window.location.href = "/app";
+  };
+
+  return (
+    <AuthPageWrapper
+      rightLink={{
+        label: "New here?",
+        to: "/register",
+      }}
+    >
+      {/* Title */}
+      <div className="mb-4">
         <h1 className="text-3xl font-bold tracking-wide">Login</h1>
         <p className="text-gray-400 mt-1">
           Welcome back — let’s get you signed in.
         </p>
       </div>
 
-      {/* ---------------- AUTH CARD ---------------- */}
+      {/* Card */}
       <AuthCard>
-        <form className="flex flex-col gap-4">
+        <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+          {/* General incorrect login error */}
+          {errors.general && (
+            <p className="text-red-400 text-sm mb-1">{errors.general}</p>
+          )}
+
           <AuthInput
             label="Email"
+            name="email"
             type="email"
             placeholder="your.email@university.edu"
+            icon={<Mail size={18} />}
+            value={form.email}
+            onChange={handleChange}
+            error={errors.email}
           />
 
-          <AuthInput label="Password" type="password" placeholder="••••••••" />
+          <AuthInput
+            label="Password"
+            name="password"
+            type="password"
+            placeholder="••••••••"
+            icon={<Lock size={18} />}
+            value={form.password}
+            onChange={handleChange}
+            error={errors.password}
+          />
 
-          {/* Primary CTA */}
           <button type="submit" className="btn-base btn-cyan w-full mt-2">
             Login
           </button>
 
-          {/* Forgot Password */}
           <button
             type="button"
             className="text-cyan-300 text-sm mt-2 hover:text-cyan-200 transition"
@@ -46,15 +125,6 @@ export default function Login() {
           </button>
         </form>
       </AuthCard>
-
-      {/* ---------------- SECONDARY CTA ---------------- */}
-      <div className="text-center mt-8 mb-4">
-        <p className="text-gray-400">New here?</p>
-      </div>
-
-      <Link to="/register" className="btn-base btn-purple w-full">
-        Create Account
-      </Link>
     </AuthPageWrapper>
   );
 }

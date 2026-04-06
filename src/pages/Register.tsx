@@ -3,12 +3,11 @@
 // Purpose: Create a new user account.
 // -------------------------------------------------------------
 
+import { Lock, Mail, User } from "lucide-react";
 import { useState } from "react";
-import AuthPageWrapper from "../components/auth/AuthPageWrapper";
-import AuthInput from "../components/auth/AuthInput";
 import AuthCard from "../components/auth/AuthCard";
-import { Link } from "react-router-dom";
-import { Mail, Lock, User } from "lucide-react";
+import AuthInput from "../components/auth/AuthInput";
+import AuthPageWrapper from "../components/auth/AuthPageWrapper";
 
 export default function Register() {
   const [form, setForm] = useState({
@@ -63,16 +62,12 @@ const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
 };
 
   return (
-    <AuthPageWrapper>
-      <div className="mt-6 mb-4 text-right">
-        <Link
-          to="/login"
-          className="text-cyan-300 text-sm hover:text-cyan-200 transition"
-        >
-          Already have an account?
-        </Link>
-      </div>
-
+    <AuthPageWrapper
+      rightLink={{
+        label: "Already have an account?",
+        to: "/login",
+      }}
+    >
       <div className="mb-4">
         <h1 className="text-3xl font-bold tracking-wide">Create Account</h1>
         <p className="text-gray-400 mt-1">

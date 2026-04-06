@@ -8,7 +8,7 @@ import { Eye, EyeOff } from "lucide-react";
 
 interface AuthInputProps {
   label: string;
-  name: string; // REQUIRED for forms
+  name: string;
   type?: string;
   placeholder?: string;
   icon?: React.ReactNode;

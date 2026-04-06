@@ -16,5 +16,5 @@ interface PageContainerProps {
 }
 
 export default function PageContainer({ children }: PageContainerProps) {
-  return <div className="pt-6 pb-4">{children}</div>;
+  return <div className="pt-4 pb-4">{children}</div>;
 }
