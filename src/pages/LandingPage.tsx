@@ -1,3 +1,8 @@
+// -------------------------------------------------------------
+// Page: Landing Page
+// Purpose: Public-facing marketing page before login/signup.
+//-------------------------------------------------------------
+
 import LandingHeader from "../components/landing/LandingHeader";
 import LandingHero from "../components/landing/LandingHero";
 import LandingValueProps from "../components/landing/LandingValueProps";
@@ -7,15 +12,15 @@ import LandingFooter from "../components/landing/LandingFooter";
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-[#0A0A0A] text-white">
-      <LandingHeader />
-      <LandingHero />
-      <LandingValueProps />
-      <LandingOffers />
-      <LandingCTA />
-
-      {/* Footer sits at the bottom */}
-      <LandingFooter />
+    <div className="page-bg min-h-screen flex justify-center">
+      <div className="w-full max-w-160 px-4 pb-10">
+        <LandingHeader />
+        <LandingHero />
+        <LandingValueProps />
+        <LandingOffers />
+        <LandingCTA />
+        <LandingFooter />
+      </div>
     </div>
   );
 }

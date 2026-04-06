@@ -1,28 +1,33 @@
+// -------------------------------------------------------------
+// Component: LandingCTA
+// Purpose: Final call-to-action section on the landing page,
+//          encouraging users to register.
+//
+// Updated:
+// - Removed black background (now sits on global gradient)
+// - Uses consistent spacing (pt/pb instead of py-12)
+// - Uses global button system (btn-base + btn-cyan)
+// - Typography aligned with design system
+// -------------------------------------------------------------
+
 import { Link } from "react-router-dom";
 
 export default function LandingCTA() {
   return (
-    // Call-to-action section encouraging users to get started
-    <section className="px-6 py-12 text-center bg-[#0A0A0A]">
+    <section className="text-center pt-10 pb-14">
       {/* CTA heading */}
-      <h2 className="text-2xl font-semibold text-white mb-4">
+      <h2 className="section-title mb-3">
         Ready to Join Your Campus Community?
       </h2>
 
       {/* Supporting text */}
-      <p className="text-gray-400 max-w-md mx-auto mb-8">
+      <p className="text-gray-300 max-w-md mx-auto mb-8 leading-relaxed">
         Connect with trusted contacts, stay aware of your surroundings, and feel
         safer every day on campus.
       </p>
 
-      {/* Get Started button linking to registration */}
-      <Link
-        to="/register"
-        className="inline-block bg-cyan-500 text-black font-semibold px-6 py-3 rounded-lg
-                   shadow-[0_0_12px_rgba(34,211,238,0.8)]
-                   hover:bg-cyan-400 hover:shadow-[0_0_16px_rgba(34,211,238,1)]
-                   transition-all"
-      >
+      {/* Get Started button */}
+      <Link to="/register" className="btn-base btn-cyan inline-flex">
         Get Started
       </Link>
     </section>

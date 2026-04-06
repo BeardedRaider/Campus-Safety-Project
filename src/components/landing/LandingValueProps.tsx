@@ -1,29 +1,39 @@
+// -------------------------------------------------------------
+// Component: LandingValueProps
+// Purpose: Displays the app's core value pillars with icons.
+//
+// Updated:
+// - Removed black background
+// - Uses consistent spacing + typography
+// - Icons now match the Home component colour system
+// -------------------------------------------------------------
+
 import { Shield, MapPin, Users } from "lucide-react";
 
 export default function LandingValueProps() {
   return (
-    <section className="px-6 py-10 text-center bg-[#0A0A0A]">
+    <section className="text-center pt-10 pb-12 px-4">
       {/* Section title */}
-      <h2 className="text-2xl font-semibold text-white mb-3">
+      <h2 className="section-title mb-3">
         Your Campus, Your Crew, Your Peace of Mind
       </h2>
 
-      {/* Short supporting paragraph */}
-      <p className="text-gray-400 max-w-md mx-auto mb-8">
+      {/* Supporting paragraph */}
+      <p className="text-gray-300 max-w-md mx-auto mb-8 leading-relaxed">
         Stay connected with trusted contacts, check in with friends, and feel
         confident knowing help is always within reach.
       </p>
 
-      {/* Icons row representing the app's core values */}
+      {/* Icons row */}
       <div className="flex items-center justify-center gap-8">
-        {/* Safety icon */}
-        <Shield className="w-10 h-10 text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.7)]" />
+        {/* Safety → Cyan (Primary) */}
+        <Shield className="w-10 h-10 text-cyan-300 drop-shadow-[0_0_6px_#22D3EE]" />
 
-        {/* Location awareness icon */}
-        <MapPin className="w-10 h-10 text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.7)]" />
+        {/* Location → Yellow (Check-Ins theme) */}
+        <MapPin className="w-10 h-10 text-yellow-300 drop-shadow-[0_0_6px_#FACC15]" />
 
-        {/* Community / support icon */}
-        <Users className="w-10 h-10 text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.7)]" />
+        {/* Community → Purple (Contacts theme) */}
+        <Users className="w-10 h-10 text-purple-300 drop-shadow-[0_0_6px_#A78BFA]" />
       </div>
     </section>
   );

@@ -1,25 +1,35 @@
+// -------------------------------------------------------------
+// Component: LandingOffers
+// Purpose: Highlights student offers + campus updates.
+//
+// Updated:
+// - Removed all black backgrounds
+// - Uses global spacing (pt/pb instead of py-10)
+// - Replaced custom dark card with global `.card` styling
+// - Typography aligned with design system
+// - Clean, premium, consistent with app theme
+// -------------------------------------------------------------
+
 export default function LandingOffers() {
   return (
-    <section className="px-6 py-10 bg-[#0A0A0A]">
+    <section className="pt-10 pb-12 px-4">
       {/* Section heading */}
-      <h2 className="text-2xl font-semibold text-white text-center mb-2">
+      <h2 className="section-title text-center mb-2">
         What's Happening on Campus
       </h2>
 
-      {/* Short description under the heading */}
-      <p className="text-gray-400 text-center max-w-md mx-auto mb-8">
+      {/* Short description */}
+      <p className="text-gray-300 text-center max-w-md mx-auto mb-8 leading-relaxed">
         Everything you need to make the most of student life.
       </p>
 
       {/* Offers card */}
-      <div className="bg-[#111111] border border-[#1F1F1F] rounded-xl p-5 shadow-lg hover:shadow-cyan-500/20 transition-shadow">
+      <div className="card p-5">
         {/* Card title */}
-        <h3 className="text-xl font-semibold text-white mb-2">
-          Student Offers
-        </h3>
+        <h3 className="text-lg font-semibold mb-2">Student Offers</h3>
 
         {/* Card description */}
-        <p className="text-gray-400 text-sm">
+        <p className="text-gray-300 text-sm leading-relaxed">
           Exclusive discounts and deals for campus safety services and student
           essentials.
         </p>
