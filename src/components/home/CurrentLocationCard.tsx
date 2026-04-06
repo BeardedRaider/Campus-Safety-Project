@@ -1,6 +1,12 @@
 // -------------------------------------------------------------
 // Component: CurrentLocationCard
 // Purpose: Display current tracking status + coordinates.
+//
+// Updated:
+// - Uses global .card + .section-title
+// - Consistent neon theme
+// - Clean spacing + typography
+// - Tailwind v4 safe
 // -------------------------------------------------------------
 
 import { MapPin } from "lucide-react";
@@ -17,18 +23,19 @@ export default function CurrentLocationCard({
   lastUpdated,
 }: Props) {
   return (
-    <div className="bg-[#111] rounded-xl p-4 mt-6 shadow-md">
+    <div className="card mt-6">
+      {/* Header */}
       <div className="flex items-center gap-2 mb-2">
         <MapPin size={18} className="text-cyan-300" />
-        <h2 className="text-lg font-semibold">Current Location</h2>
+        <h2 className="section-title m-0">Current Location</h2>
       </div>
 
-      <p
-        className={`text-sm ${isTracking ? "text-green-400" : "text-red-400"}`}
-      >
+      {/* Tracking Status */}
+      <p className={`text-sm ${isTracking ? "text-green-400" : "text-red-400"}`}>
         {isTracking ? "Active" : "Inactive"}
       </p>
 
+      {/* Coordinates + Timestamp */}
       <div className="mt-2 text-sm text-gray-300">
         <p>
           <span className="text-gray-400">Coordinates:</span>{" "}

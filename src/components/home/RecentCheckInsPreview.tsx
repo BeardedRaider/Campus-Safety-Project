@@ -1,6 +1,12 @@
 // -------------------------------------------------------------
 // Component: RecentCheckInsPreview
 // Purpose: Show the user's last few check-ins on the Home page.
+//
+// Updated:
+// - Uses global .card + .section-title
+// - Consistent neon theme
+// - Clean spacing + typography
+// - Tailwind v4 safe
 // -------------------------------------------------------------
 
 import { MapPin, Clock } from "lucide-react";
@@ -17,10 +23,10 @@ export default function RecentCheckInsPreview() {
   ];
 
   return (
-    <div className="bg-[#111] rounded-xl p-4 mt-6 shadow-md">
+    <div className="card mt-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
-        <h2 className="text-lg font-semibold">Recent Check-Ins</h2>
+        <h2 className="section-title m-0">Recent Check-Ins</h2>
 
         <button
           onClick={() => navigate("/app/check-ins")}
@@ -34,11 +40,13 @@ export default function RecentCheckInsPreview() {
       <div className="flex flex-col gap-3">
         {recent.map((item) => (
           <div key={item.id} className="flex items-center justify-between">
+            {/* Location */}
             <div className="flex items-center gap-2">
               <MapPin size={16} className="text-purple-300" />
               <p className="text-sm">{item.location}</p>
             </div>
 
+            {/* Time */}
             <div className="flex items-center gap-1 text-gray-400 text-xs">
               <Clock size={14} />
               <span>{item.time}</span>

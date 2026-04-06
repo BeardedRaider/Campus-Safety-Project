@@ -109,6 +109,28 @@
         min-width: 5rem; /* min-w-20 */
     }
 
+        /* -----------------------------------------
+       STAT TILE COLOUR VARIANTS
+    ------------------------------------------ */
+    
+        .stat-tile-cyan {
+            background-color: #0a2a33;
+            box-shadow: 0 0 10px rgba(0, 229, 255, 0.35);
+            border: 1px solid rgba(0, 229, 255, 0.3);
+        }
+    
+        .stat-tile-purple {
+            background-color: #2a1b3d;
+            box-shadow: 0 0 10px rgba(179, 136, 255, 0.35);
+            border: 1px solid rgba(179, 136, 255, 0.3);
+        }
+    
+        .stat-tile-yellow {
+            background-color: #3a3215;
+            box-shadow: 0 0 10px rgba(255, 224, 102, 0.35);
+            border: 1px solid rgba(255, 224, 102, 0.3);
+        }
+
     /* -----------------------------------------
        PAGE BACKGROUND
        Used on all app pages

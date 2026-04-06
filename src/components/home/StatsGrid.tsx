@@ -13,21 +13,24 @@ export default function StatsGrid() {
         icon={<CheckCircle size={22} />}
         value="3"
         label="Check-ins Today"
-        color="text-cyan-300"
+        colorClass="stat-tile-cyan"
+        iconColorClass="text-cyan-300"
       />
 
       <StatsCard
         icon={<Clock size={22} />}
         value="2.5h"
         label="Tracking Time"
-        color="text-purple-300"
+        colorClass="stat-tile-purple"
+        iconColorClass="text-purple-300"
       />
 
       <StatsCard
         icon={<Users size={22} />}
         value="4"
         label="Emergency Contacts"
-        color="text-yellow-300"
+        colorClass="stat-tile-yellow"
+        iconColorClass="text-yellow-300"
       />
     </div>
   );

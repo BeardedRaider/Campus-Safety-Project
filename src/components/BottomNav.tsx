@@ -2,12 +2,11 @@
 // Component: BottomNav
 // Purpose: Global bottom navigation for the app.
 //
-// This component:
-// - Uses Lucide icons for a clean, modern UI
-// - Applies colour-coded icons for better scannability
-// - Matches the landing page accent colours (cyan, purple, yellow)
-// - Highlights the active tab with brighter colour + glow
-// - Sits inside the 640px max-width container from Layout
+// Updated:
+// - Cleaner className logic
+// - Consistent neon theme
+// - Tailwind v4 safe
+// - Structured + readable
 // -------------------------------------------------------------
 
 import { NavLink } from "react-router-dom";
@@ -28,15 +27,16 @@ export default function BottomNav() {
       {/* ---------------- HOME ---------------- */}
       <NavLink
         to="/app"
+        end
         className={({ isActive }) =>
           `
-          flex flex-col items-center text-xs transition
-          ${
-            isActive
-              ? "text-cyan-300 drop-shadow-[0_0_6px_#22D3EE]"
-              : "text-cyan-500/70"
-          }
-        `
+            flex flex-col items-center text-xs transition
+            ${
+              isActive
+                ? "text-cyan-300 drop-shadow-[0_0_6px_#22D3EE]"
+                : "text-cyan-500/70"
+            }
+          `
         }
       >
         <Home size={22} />
@@ -48,13 +48,13 @@ export default function BottomNav() {
         to="/app/contacts"
         className={({ isActive }) =>
           `
-          flex flex-col items-center text-xs transition
-          ${
-            isActive
-              ? "text-purple-300 drop-shadow-[0_0_6px_#A78BFA]"
-              : "text-purple-400/70"
-          }
-        `
+            flex flex-col items-center text-xs transition
+            ${
+              isActive
+                ? "text-purple-300 drop-shadow-[0_0_6px_#A78BFA]"
+                : "text-purple-400/70"
+            }
+          `
         }
       >
         <Users size={22} />
@@ -66,13 +66,13 @@ export default function BottomNav() {
         to="/app/check-ins"
         className={({ isActive }) =>
           `
-          flex flex-col items-center text-xs transition
-          ${
-            isActive
-              ? "text-yellow-300 drop-shadow-[0_0_6px_#FACC15]"
-              : "text-yellow-400/70"
-          }
-        `
+            flex flex-col items-center text-xs transition
+            ${
+              isActive
+                ? "text-yellow-300 drop-shadow-[0_0_6px_#FACC15]"
+                : "text-yellow-400/70"
+            }
+          `
         }
       >
         <MapPin size={22} />
@@ -84,13 +84,13 @@ export default function BottomNav() {
         to="/app/settings"
         className={({ isActive }) =>
           `
-          flex flex-col items-center text-xs transition
-          ${
-            isActive
-              ? "text-gray-300 drop-shadow-[0_0_6px_#9CA3AF]"
-              : "text-gray-400/70"
-          }
-        `
+            flex flex-col items-center text-xs transition
+            ${
+              isActive
+                ? "text-gray-300 drop-shadow-[0_0_6px_#9CA3AF]"
+                : "text-gray-400/70"
+            }
+          `
         }
       >
         <Settings size={22} />

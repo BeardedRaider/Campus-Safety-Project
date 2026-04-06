@@ -2,12 +2,12 @@
 // Component: Layout
 // Purpose: Global wrapper for all app pages.
 //
-// This component:
-// - Applies the global dark gradient background (matching landing page)
-// - Centers all content with a max-width of 640px (mobile-first responsive)
-// - Ensures consistent padding and spacing across all pages
-// - Renders the Bottom Navigation inside the same width container
-// - Provides a unified visual structure for the entire app
+// Updated:
+// - Uses global .page-bg for gradient + text color
+// - Clean max-width container
+// - Consistent spacing + padding
+// - BottomNav anchored inside container
+// - Tailwind v4 safe
 // -------------------------------------------------------------
 
 import type { ReactNode } from "react";
@@ -19,21 +19,13 @@ interface LayoutProps {
 
 export default function Layout({ children }: LayoutProps) {
   return (
-    <div
-      className="
-        min-h-screen 
-        w-full 
-        bg-linear-to-b from-[#0A0A0F] to-[#0D1A26] 
-        text-white 
-        flex 
-        justify-center
-      "
-    >
+    <div className="page-bg flex justify-center">
       {/* 
         Inner content container:
-        - max-w-[640px] matches landing page proportions
-        - mx-auto centers the app on desktop
-        - relative allows BottomNav to anchor inside this container
+        - max-w-160 (640px)
+        - px-4 for consistent horizontal padding
+        - pb-24 ensures content never hides behind BottomNav
+        - relative allows BottomNav to anchor inside
       */}
       <div className="w-full max-w-160 px-4 pb-24 relative">
         {children}
