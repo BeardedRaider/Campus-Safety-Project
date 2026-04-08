@@ -26,6 +26,10 @@ import Settings from "./pages/Settings";
 // Dev-only testing page
 import GeoTest from "./pages/GeoTest";
 
+// Route protection
+import ProtectedRoute from "./components/auth/ProtectedRoute";
+import PublicRoute from "./components/auth/PublicRoute";
+
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -37,11 +41,19 @@ export const router = createBrowserRouter([
   // -------------------------------------------------------------
   {
     path: "/login",
-    element: <Login />,
+    element: (
+      <PublicRoute>
+        <Login />
+      </PublicRoute>
+    ),
   },
   {
     path: "/register",
-    element: <Register />,
+    element: (
+      <PublicRoute>
+        <Register />
+      </PublicRoute>
+    ),
   },
 
   // -------------------------------------------------------------
@@ -58,7 +70,11 @@ export const router = createBrowserRouter([
   // -------------------------------------------------------------
   {
     path: "/app",
-    element: <App />,
+    element: (
+      <ProtectedRoute>
+        <App />
+      </ProtectedRoute>
+    ),
     children: [
       { index: true, element: <Home /> },
       { path: "contacts", element: <Contacts /> },
