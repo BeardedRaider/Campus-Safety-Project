@@ -29,6 +29,7 @@ import GeoTest from "./pages/GeoTest";
 // Route protection
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import PublicRoute from "./components/auth/PublicRoute";
+import TrackingHistory from "./pages/TrackingHistory";
 
 export const router = createBrowserRouter([
   {
@@ -80,6 +81,8 @@ export const router = createBrowserRouter([
       { path: "contacts", element: <Contacts /> },
       { path: "check-ins", element: <CheckIns /> },
       { path: "settings", element: <Settings /> },
+      { path: "tracking-history", element: <TrackingHistory /> },
+      // { path: "tracking-history/:id", element: <TrackingSession /> },
     ],
   },
 ]);

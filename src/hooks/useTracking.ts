@@ -6,13 +6,25 @@
 // trackingInterval meaning:
 // - > 0  → auto-stop after X ms
 // - = 0  → track until user manually stops
+//
+// Now integrates with useTrackingHistory to:
+// - start a tracking session
+// - save every GPS update as a breadcrumb point
+// - end the session when tracking stops
 // -------------------------------------------------------------
 
 import { useState, useRef, useEffect } from "react";
 import { useSettings } from "./useSettings";
+import { useTrackingHistory } from "./useTrackingHistory";
 
 export function useTracking() {
   const { settings } = useSettings();
+
+  // Tracking history hook
+  const { startSession, addPoint, endSession } = useTrackingHistory();
+
+  // Active session ID
+  const sessionIdRef = useRef<string | null>(null);
 
   const [isTracking, setIsTracking] = useState(false);
   const [position, setPosition] = useState<GeolocationPosition | null>(null);
@@ -30,12 +42,19 @@ export function useTracking() {
       console.error("Geolocation not supported");
       return;
     }
-      console.log(
-        "Starting tracking with interval (ms):",
-        settings.trackingInterval,
-      );
+
+    console.log(
+      "Starting tracking with interval (ms):",
+      settings.trackingInterval,
+    );
 
     setIsTracking(true);
+
+    // ---------------------------------------------------------
+    // Start a new tracking session
+    // ---------------------------------------------------------
+    sessionIdRef.current = startSession();
+    console.log("Started session:", sessionIdRef.current);
 
     // Clear any previous timers
     if (retryTimeoutRef.current) clearTimeout(retryTimeoutRef.current);
@@ -58,6 +77,17 @@ export function useTracking() {
       (pos) => {
         setPosition(pos);
         setLastUpdated(new Date().toLocaleString());
+
+        // -----------------------------------------------------
+        // Save breadcrumb point to history
+        // -----------------------------------------------------
+        if (sessionIdRef.current) {
+          addPoint(
+            sessionIdRef.current,
+            pos.coords.latitude,
+            pos.coords.longitude,
+          );
+        }
       },
 
       // Retry logic
@@ -78,6 +108,15 @@ export function useTracking() {
   // -------------------------------------------------------------
   const stopTracking = () => {
     setIsTracking(false);
+
+    // ---------------------------------------------------------
+    // End the active tracking session
+    // ---------------------------------------------------------
+    if (sessionIdRef.current) {
+      endSession(sessionIdRef.current);
+      console.log("Ended session:", sessionIdRef.current);
+      sessionIdRef.current = null;
+    }
 
     if (watchIdRef.current !== null) {
       navigator.geolocation.clearWatch(watchIdRef.current);
