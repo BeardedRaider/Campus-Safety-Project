@@ -38,8 +38,8 @@ const AuthContext = createContext<AuthContextType | null>(null);
 // TEST MODE: 10 seconds
 // PROD MODE: 15 minutes
 // -------------------------------
-const INACTIVITY_LIMIT = 10 * 1000; // 10 seconds for testing
-// const INACTIVITY_LIMIT = 15 * 60 * 1000; // 15 minutes for production
+// const INACTIVITY_LIMIT = 10 * 1000; // 10 seconds for testing
+const INACTIVITY_LIMIT = 15 * 60 * 1000; // 15 minutes for production
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<any>(() => {

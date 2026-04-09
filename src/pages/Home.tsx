@@ -7,6 +7,8 @@
 // - Uses PageContainer for consistent vertical spacing
 // - All components follow the global design system
 // - Tracking state comes from useTracking hook
+// - AuthProvider is notified when tracking starts/stops so
+//   inactivity auto-logout is paused during tracking
 // -------------------------------------------------------------
 
 import PageContainer from "../components/PageContainer";
@@ -16,14 +18,44 @@ import TrackingButtons from "../components/home/TrackingButtons";
 import CurrentLocationCard from "../components/home/CurrentLocationCard";
 import RecentCheckInsPreview from "../components/home/RecentCheckInsPreview";
 import SafetyTip from "../components/home/SafetyTip";
+
 import { useTracking } from "../hooks/useTracking";
+import { useAuth } from "../context/AuthProvider";
 
 export default function Home() {
   // -------------------------------------------------------------
-  // Tracking state + actions from custom hook
+  // Tracking state + actions from custom hook (geolocation only)
   // -------------------------------------------------------------
-  const { isTracking, position, lastUpdated, startTracking, stopTracking } =
-    useTracking();
+  const {
+    isTracking,
+    position,
+    lastUpdated,
+    startTracking: trackingStart,
+    stopTracking: trackingStop,
+  } = useTracking();
+
+  // -------------------------------------------------------------
+  // AuthProvider controls session + inactivity timer
+  // We notify it when tracking starts/stops
+  // -------------------------------------------------------------
+  const { startTracking: authStartTracking, stopTracking: authStopTracking } =
+    useAuth();
+
+  // -------------------------------------------------------------
+  // Combined handlers
+  // These ensure BOTH systems stay in sync:
+  // - useTracking handles geolocation
+  // - AuthProvider pauses/resumes inactivity timer
+  // -------------------------------------------------------------
+  const handleStartTracking = () => {
+    trackingStart(); // start geolocation
+    authStartTracking(); // pause inactivity timer
+  };
+
+  const handleStopTracking = () => {
+    trackingStop(); // stop geolocation
+    authStopTracking(); // resume inactivity timer
+  };
 
   return (
     <PageContainer>
@@ -42,8 +74,8 @@ export default function Home() {
       ---------------------------------------------------------- */}
       <TrackingButtons
         isTracking={isTracking}
-        startTracking={startTracking}
-        stopTracking={stopTracking}
+        startTracking={handleStartTracking}
+        stopTracking={handleStopTracking}
       />
 
       {/* ---------------------------------------------------------
