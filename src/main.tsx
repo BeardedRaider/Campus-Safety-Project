@@ -18,6 +18,7 @@ import SessionExpiredModal from "./components/auth/SessionExpiredModal";
 // Global styles
 import "./styles/index.css";
 import "./styles/safe-area.css";
+import { TrackingProvider } from "./context/TrackingProvider";
 
 const root = document.getElementById("root") as HTMLElement;
 
@@ -50,9 +51,11 @@ ReactDOM.createRoot(root).render(
   // - tracking pause logic works
   // - session expired modal can appear above all screens
   // -------------------------------------------------------------
-  <AuthProvider>
-    <AppWithModals />
-  </AuthProvider>,
+  <TrackingProvider>
+    <AuthProvider>
+      <AppWithModals />
+    </AuthProvider>
+  </TrackingProvider>,
 );
 
 // -------------------------------------------------------------

@@ -7,9 +7,9 @@
 // - Tracking points (timestamp + lat/lng)
 //
 // Architecture:
-// - useTracking.ts calls startSession() when tracking begins
-// - useTracking.ts calls addPoint() on every GPS update
-// - useTracking.ts calls endSession() when tracking stops
+// - TrackingProvider calls startSession() when tracking begins
+// - TrackingProvider calls addPoint() on every GPS update
+// - TrackingProvider calls endSession() when tracking stops
 //
 // Storage keys:
 // - trackingSessions: TrackingSession[]
@@ -32,14 +32,14 @@ import { v4 as uuid } from "uuid";
 // -------------------------------------------------------------
 export interface TrackingPoint {
   id: string;
-  sessionId: string;
+  sessionId: string; // string session ID
   timestamp: number;
   latitude: number;
   longitude: number;
 }
 
 export interface TrackingSession {
-  id: string;
+  id: string; // string session ID
   startedAt: number;
   endedAt: number | null;
   pointIds: string[];
@@ -75,13 +75,13 @@ function savePoints(points: TrackingPoint[]) {
 export function useTrackingHistory() {
   // -----------------------------------------------------------
   // Start a new tracking session
-  // Called when user presses "Start Tracking"
+  // Called when tracking begins
   // -----------------------------------------------------------
   const startSession = useCallback((): string => {
     const sessions = loadSessions();
 
     const newSession: TrackingSession = {
-      id: uuid(),
+      id: uuid(), // string ID
       startedAt: Date.now(),
       endedAt: null,
       pointIds: [],
@@ -98,7 +98,12 @@ export function useTrackingHistory() {
   // Called on every GPS update
   // -----------------------------------------------------------
   const addPoint = useCallback(
-    (sessionId: string, latitude: number, longitude: number) => {
+    (
+      sessionId: string,
+      latitude: number,
+      longitude: number,
+      timestamp: number,
+    ) => {
       const sessions = loadSessions();
       const points = loadPoints();
 
@@ -108,7 +113,7 @@ export function useTrackingHistory() {
       const point: TrackingPoint = {
         id: uuid(),
         sessionId,
-        timestamp: Date.now(),
+        timestamp,
         latitude,
         longitude,
       };
@@ -124,7 +129,7 @@ export function useTrackingHistory() {
 
   // -----------------------------------------------------------
   // End a session
-  // Called when user presses "Stop Tracking" or auto-stop triggers
+  // Called when tracking stops
   // -----------------------------------------------------------
   const endSession = useCallback((sessionId: string) => {
     const sessions = loadSessions();

@@ -19,7 +19,7 @@ import CurrentLocationCard from "../components/home/CurrentLocationCard";
 import RecentCheckInsPreview from "../components/home/RecentCheckInsPreview";
 import SafetyTip from "../components/home/SafetyTip";
 
-import { useTracking } from "../hooks/useTracking";
+import { useTrackingContext } from "../context/TrackingProvider";
 import { useAuth } from "../context/AuthProvider";
 
 export default function Home() {
@@ -32,7 +32,7 @@ export default function Home() {
     lastUpdated,
     startTracking: trackingStart,
     stopTracking: trackingStop,
-  } = useTracking();
+  } = useTrackingContext();
 
   // -------------------------------------------------------------
   // AuthProvider controls session + inactivity timer
@@ -84,7 +84,7 @@ export default function Home() {
       <CurrentLocationCard
         isTracking={isTracking}
         position={position}
-        lastUpdated={lastUpdated}
+        lastUpdated={lastUpdated ? String(lastUpdated) : null}
       />
 
       {/* ---------------------------------------------------------
