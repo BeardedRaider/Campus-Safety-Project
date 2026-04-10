@@ -1,31 +1,46 @@
+// -------------------------------------------------------------
+// Page: CheckIns
+// Purpose: Display recent check-ins + allow creating new ones.
+//
+// Features:
+// - Floating + button (same as Contacts)
+// - NewCheckInModal for note + photo
+// - Uses useGeolocation + useCheckIns
+// - Clean, modular layout
+// -------------------------------------------------------------
+
+import { useState } from "react";
+import PageContainer from "../components/PageContainer";
 import { useGeolocation } from "../hooks/useGeolocation";
 import { useCheckIns } from "../hooks/useCheckIns";
 import type { CheckIn } from "../types/CheckIn";
-import { useState } from "react";
-import {
-  Radar,
-  Check,
-  X,
-  MapPin,
-  Target,
-  Clock,
-  StickyNote,
-  Trash2,
-} from "lucide-react";
+import CheckInList from "../components/checkins/CheckInList";
+import NewCheckInModal from "../components/checkins/NewCheckInModal";
+import { Plus, Radar, Check, X } from "lucide-react";
 
 export default function CheckIns() {
   const { getCurrentLocation } = useGeolocation();
   const { checkIns, addCheckIn, deleteCheckIn } = useCheckIns();
 
+  // Modal control
+  const [modalOpen, setModalOpen] = useState(false);
+
+  // Animated button states
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState(false);
-  const [note, setNote] = useState("");
 
-  const handleCheckIn = async () => {
+  // -------------------------------------------------------------
+  // Handle creating a new check-in (called by modal)
+  // -------------------------------------------------------------
+  const handleCreateCheckIn = async (data: {
+    note: string;
+    photo: string | null;
+  }) => {
     setIsLoading(true);
     getCurrentLocation();
 
+    // Delay to show animation + allow geolocation to resolve
     setTimeout(() => {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
@@ -35,11 +50,13 @@ export default function CheckIns() {
             latitude: pos.coords.latitude,
             longitude: pos.coords.longitude,
             accuracy: pos.coords.accuracy,
-            note: note.trim() || undefined,
+            note: data.note || undefined,
+            photo: data.photo || undefined,
           };
 
           addCheckIn(newCheckIn);
-          setNote("");
+
+          // Button animation
           setIsLoading(false);
           setSuccess(true);
           setTimeout(() => setSuccess(false), 2000);
@@ -53,95 +70,52 @@ export default function CheckIns() {
     }, 500);
   };
 
+  // -------------------------------------------------------------
+  // Render
+  // -------------------------------------------------------------
   return (
-    <div className="p-6 text-white">
+    <PageContainer>
       <h1 className="text-2xl font-semibold mb-6">Check-Ins</h1>
 
-      {/* Note Input */}
-      <input
-        type="text"
-        value={note}
-        onChange={(e) => setNote(e.target.value)}
-        placeholder="Add a note (optional)"
-        className="w-full mb-4 px-4 py-3 rounded-lg bg-gray-800 text-white placeholder-gray-500 border border-gray-700 focus:border-cyan-500 focus:outline-none transition"
-        maxLength={120}
-      />
+      {/* Recent Check-Ins */}
+      <CheckInList checkIns={checkIns} onDelete={deleteCheckIn} />
 
-      {/* Check-In Button */}
+      {/* Floating Add Button */}
       <button
-        onClick={handleCheckIn}
-        disabled={isLoading}
-        className={`w-full px-4 py-3 rounded-lg mb-8 flex items-center justify-center gap-2 font-medium transition-all shadow-md ${
-          isLoading
-            ? "bg-cyan-700 opacity-70"
-            : success
-              ? "bg-green-600"
-              : error
-                ? "bg-red-600"
-                : "bg-cyan-500 hover:bg-cyan-400"
-        }`}
+        onClick={() => setModalOpen(true)}
+        className="fixed bottom-24 right-6 bg-cyan-500 text-black p-4 rounded-full shadow-lg"
       >
-        {isLoading ? (
-          <Radar className="animate-spin-slow" size={20} />
-        ) : success ? (
-          <Check size={20} />
-        ) : error ? (
-          <X size={20} />
-        ) : (
-          <Radar size={20} />
-        )}
-
-        {isLoading
-          ? "Sending..."
-          : success
-            ? "Sent!"
-            : error
-              ? "Failed"
-              : "Send Check-In"}
+        <Plus size={24} />
       </button>
 
-      {/* Recent Check-Ins */}
-      <h2 className="text-xl font-semibold mb-4">Recent Check-Ins</h2>
+      {/* New Check-In Modal */}
+      <NewCheckInModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onSubmit={handleCreateCheckIn}
+      />
 
-      <ul className="space-y-4">
-        {checkIns.map((c) => (
-          <li
-            key={c.id}
-            className="bg-gray-800 p-4 rounded-lg shadow-sm flex justify-between items-start border border-gray-700"
-          >
-            <div className="space-y-1">
-              <p className="flex items-center gap-2 text-gray-300">
-                <MapPin size={18} className="text-cyan-400" />
-                {c.latitude.toFixed(5)}, {c.longitude.toFixed(5)}
-              </p>
+      {/* Hidden animated button (modal handles UI now) */}
+      {isLoading && (
+        <div className="fixed top-20 right-6 bg-cyan-700 text-black p-3 rounded-full shadow-lg flex items-center gap-2">
+          <Radar className="animate-spin-slow" size={20} />
+          Sending...
+        </div>
+      )}
 
-              <p className="flex items-center gap-2 text-gray-300">
-                <Target size={18} className="text-purple-400" />
-                Accuracy: {c.accuracy}m
-              </p>
+      {success && (
+        <div className="fixed top-20 right-6 bg-green-600 text-black p-3 rounded-full shadow-lg flex items-center gap-2">
+          <Check size={20} />
+          Sent!
+        </div>
+      )}
 
-              {c.note && (
-                <p className="flex items-center gap-2 text-gray-300">
-                  <StickyNote size={18} className="text-yellow-400" />
-                  {c.note}
-                </p>
-              )}
-
-              <p className="flex items-center gap-2 text-gray-400 text-sm">
-                <Clock size={16} />
-                {new Date(c.timestamp).toLocaleString()}
-              </p>
-            </div>
-
-            <button
-              onClick={() => deleteCheckIn(c.id)}
-              className="text-red-400 hover:text-red-300 transition"
-            >
-              <Trash2 size={20} />
-            </button>
-          </li>
-        ))}
-      </ul>
-    </div>
+      {error && (
+        <div className="fixed top-20 right-6 bg-red-600 text-black p-3 rounded-full shadow-lg flex items-center gap-2">
+          <X size={20} />
+          Failed
+        </div>
+      )}
+    </PageContainer>
   );
 }
