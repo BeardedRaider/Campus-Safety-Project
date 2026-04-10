@@ -1,5 +1,5 @@
 // -------------------------------------------------------------
-// Component: PhotoCapture
+// Component: PhotoCapture with compression
 // Purpose: Handle camera input + preview + retake.
 //
 // Props:
@@ -28,26 +28,52 @@ export default function PhotoCapture({
   onClearPhoto,
 }: PhotoCaptureProps) {
   // -------------------------------------------------------------
-  // Convert selected file → base64 string
+  // Compress image using canvas
   // -------------------------------------------------------------
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const compressImage = (file: File): Promise<string> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      const reader = new FileReader();
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const base64 = reader.result as string;
-      onPhotoCaptured(base64);
-    };
-    reader.readAsDataURL(file);
+      reader.onload = (e) => {
+        img.src = e.target?.result as string;
+      };
+
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const MAX_WIDTH = 300; // target width
+        const scale = MAX_WIDTH / img.width;
+
+        canvas.width = MAX_WIDTH;
+        canvas.height = img.height * scale;
+
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return resolve("");
+
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+        // Convert to JPEG @ quality 0.6
+        const compressedBase64 = canvas.toDataURL("image/jpeg", 0.6);
+        resolve(compressedBase64);
+      };
+
+      reader.readAsDataURL(file);
+    });
   };
 
   // -------------------------------------------------------------
-  // Render
+  // Handle file input → compress → return base64
   // -------------------------------------------------------------
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const compressed = await compressImage(file);
+    onPhotoCaptured(compressed);
+  };
+
   return (
     <div className="w-full flex flex-col items-center gap-4">
-      {/* If no photo yet → show Take Photo button */}
       {!photo && (
         <label className="w-full">
           <div className="w-full bg-cyan-600 hover:bg-cyan-500 text-black py-3 rounded-lg flex items-center justify-center gap-2 cursor-pointer transition">
@@ -55,7 +81,6 @@ export default function PhotoCapture({
             <span>Take Photo</span>
           </div>
 
-          {/* Hidden file input */}
           <input
             type="file"
             accept="image/*"
@@ -66,17 +91,14 @@ export default function PhotoCapture({
         </label>
       )}
 
-      {/* If photo exists → show preview + retake */}
       {photo && (
         <div className="w-full flex flex-col items-center gap-3">
-          {/* Large preview */}
           <img
             src={photo}
             alt="Captured"
             className="w-full max-h-48 object-cover rounded-lg border border-cyan-500 shadow-lg"
           />
 
-          {/* Retake button */}
           <button
             onClick={onClearPhoto}
             className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg flex items-center gap-2 transition"
