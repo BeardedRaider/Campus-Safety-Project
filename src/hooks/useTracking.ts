@@ -7,7 +7,7 @@
 // - > 0  → auto-stop after X ms
 // - = 0  → track until user manually stops
 //
-// Now integrates with useTrackingHistory to:
+// Integrates with useTrackingHistory to:
 // - start a tracking session
 // - save every GPS update as a breadcrumb point
 // - end the session when tracking stops
@@ -50,19 +50,15 @@ export function useTracking() {
 
     setIsTracking(true);
 
-    // ---------------------------------------------------------
     // Start a new tracking session
-    // ---------------------------------------------------------
     sessionIdRef.current = startSession();
     console.log("Started session:", sessionIdRef.current);
 
-    // Clear any previous timers
+    // Clear timers
     if (retryTimeoutRef.current) clearTimeout(retryTimeoutRef.current);
     if (autoStopTimeoutRef.current) clearTimeout(autoStopTimeoutRef.current);
 
-    // ---------------------------------------------------------
-    // AUTO-STOP TIMER
-    // ---------------------------------------------------------
+    // Auto-stop timer
     if (settings.trackingInterval > 0) {
       autoStopTimeoutRef.current = setTimeout(() => {
         console.log("Auto-stop triggered");
@@ -70,23 +66,21 @@ export function useTracking() {
       }, settings.trackingInterval);
     }
 
-    // ---------------------------------------------------------
     // Start GPS watch
-    // ---------------------------------------------------------
     watchIdRef.current = navigator.geolocation.watchPosition(
       (pos) => {
         setPosition(pos);
+
+        // HUMAN‑READABLE timestamp (the one you had before)
         setLastUpdated(new Date().toLocaleString());
 
-        // -----------------------------------------------------
-        // Save breadcrumb point to history
-        // -----------------------------------------------------
+        // Save breadcrumb point
         if (sessionIdRef.current) {
           addPoint(
             sessionIdRef.current,
             pos.coords.latitude,
             pos.coords.longitude,
-            Date.now(),
+            Date.now(), // REQUIRED 4th argument
           );
         }
       },
@@ -110,9 +104,7 @@ export function useTracking() {
   const stopTracking = () => {
     setIsTracking(false);
 
-    // ---------------------------------------------------------
     // End the active tracking session
-    // ---------------------------------------------------------
     if (sessionIdRef.current) {
       endSession(sessionIdRef.current);
       console.log("Ended session:", sessionIdRef.current);
