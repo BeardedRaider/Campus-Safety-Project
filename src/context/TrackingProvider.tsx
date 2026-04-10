@@ -1,18 +1,12 @@
 // -------------------------------------------------------------
 // Context: TrackingProvider
 // Purpose: Global tracking system that persists across navigation.
-//
-// Handles:
-// - Starting/stopping tracking
-// - Creating sessions
-// - Saving breadcrumb points
-// - Exposing live tracking state
-// - Ensuring tracking continues even when leaving Home page
-//
 // -------------------------------------------------------------
 
 import { createContext, useContext, useEffect, useRef, useState } from "react";
-import { useTrackingHistory } from "../hooks/useTrackingHistory";
+import { useTrackingHistory} from "../hooks/useTrackingHistory";
+import type { TrackingSession } from "../hooks/useTrackingHistory";
+
 
 interface TrackingContextValue {
   isTracking: boolean;
@@ -21,28 +15,25 @@ interface TrackingContextValue {
   startTracking: () => void;
   stopTracking: () => void;
   activeSessionId: string | null;
+  activeSession: TrackingSession | null; // NEW
 }
 
 const TrackingContext = createContext<TrackingContextValue | null>(null);
 
 export function TrackingProvider({ children }: { children: React.ReactNode }) {
-  // -------------------------------------------------------------
-  // Tracking history functions (session + point saving)
-  // -------------------------------------------------------------
-  const { startSession, endSession, addPoint } = useTrackingHistory();
+  const { startSession, endSession, addPoint, sessions } = useTrackingHistory();
 
-  // -------------------------------------------------------------
-  // Global tracking state
-  // -------------------------------------------------------------
   const [isTracking, setIsTracking] = useState(false);
   const [position, setPosition] = useState<GeolocationPosition | null>(null);
   const [lastUpdated, setLastUpdated] = useState<number | null>(null);
-
-  // Session ID is a string everywhere
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
 
-  // Geolocation watch ID
   const watchIdRef = useRef<number | null>(null);
+
+  // Compute active session
+  const activeSession = activeSessionId
+    ? sessions.find((s) => s.id === activeSessionId) || null
+    : null;
 
   // -------------------------------------------------------------
   // Start tracking
@@ -50,26 +41,21 @@ export function TrackingProvider({ children }: { children: React.ReactNode }) {
   const startTracking = () => {
     if (isTracking) return;
 
-    // Create a new session and store its ID
-    const sessionId = startSession(); // string
+    const sessionId = startSession();
     setActiveSessionId(sessionId);
     setIsTracking(true);
 
-    // Begin geolocation watch
     watchIdRef.current = navigator.geolocation.watchPosition(
       (pos) => {
         setPosition(pos);
         setLastUpdated(Date.now());
 
-        // Save breadcrumb point
-        if (sessionId) {
-          addPoint(
-            sessionId,
-            pos.coords.latitude,
-            pos.coords.longitude,
-            Date.now(), // timestamp
-          );
-        }
+        addPoint(
+          sessionId,
+          pos.coords.latitude,
+          pos.coords.longitude,
+          Date.now(),
+        );
       },
       (err) => console.error("Geolocation error:", err),
       {
@@ -86,12 +72,10 @@ export function TrackingProvider({ children }: { children: React.ReactNode }) {
   const stopTracking = () => {
     if (!isTracking) return;
 
-    // Stop geolocation watcher
     if (watchIdRef.current !== null) {
       navigator.geolocation.clearWatch(watchIdRef.current);
     }
 
-    // Close the active session
     if (activeSessionId) {
       endSession(activeSessionId);
     }
@@ -100,9 +84,7 @@ export function TrackingProvider({ children }: { children: React.ReactNode }) {
     setActiveSessionId(null);
   };
 
-  // -------------------------------------------------------------
-  // Cleanup on unmount (rare, but safe)
-  // -------------------------------------------------------------
+  // Cleanup
   useEffect(() => {
     return () => {
       if (watchIdRef.current !== null) {
@@ -120,6 +102,7 @@ export function TrackingProvider({ children }: { children: React.ReactNode }) {
         startTracking,
         stopTracking,
         activeSessionId,
+        activeSession, // NEW
       }}
     >
       {children}
@@ -127,14 +110,9 @@ export function TrackingProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-// -------------------------------------------------------------
-// Hook: useTrackingContext
-// Purpose: Access tracking state anywhere in the app
-// -------------------------------------------------------------
 export function useTrackingContext() {
   const ctx = useContext(TrackingContext);
-  if (!ctx) {
+  if (!ctx)
     throw new Error("useTrackingContext must be used inside TrackingProvider");
-  }
   return ctx;
 }
