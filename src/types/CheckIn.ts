@@ -5,5 +5,6 @@ export interface CheckIn {
   latitude: number;// Latitude and longitude of the check-in location
   longitude: number;// Latitude and longitude of the check-in location
   accuracy: number;// Accuracy of the location in meters
-  note?: string; // Optional field for any additional notes about the check-in  
+  note?: string; // Optional field for any additional notes about the check-in
+  photo?: string; // Optional field for a photo associated with the check-in, stored as a base64 string  
 }
