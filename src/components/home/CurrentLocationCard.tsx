@@ -7,9 +7,11 @@
 // - Consistent neon theme
 // - Clean spacing + typography
 // - Tailwind v4 safe
+// - Added "View Tracking History" button aligned like Recent Check-Ins
 // -------------------------------------------------------------
 
 import { MapPin } from "lucide-react";
+import { Link } from "react-router-dom";
 
 interface Props {
   isTracking: boolean;
@@ -24,14 +26,25 @@ export default function CurrentLocationCard({
 }: Props) {
   return (
     <div className="card mt-6">
-      {/* Header */}
-      <div className="flex items-center gap-2 mb-2">
-        <MapPin size={18} className="text-cyan-300" />
-        <h2 className="section-title m-0">Current Location</h2>
+      {/* Header (matches Recent Check-Ins layout) */}
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <MapPin size={18} className="text-cyan-300" />
+          <h2 className="section-title m-0">Current Location</h2>
+        </div>
+
+        <Link
+          to="/app/tracking-history"
+          className="text-cyan-300 text-sm hover:underline"
+        >
+          View Tracking History
+        </Link>
       </div>
 
       {/* Tracking Status */}
-      <p className={`text-sm ${isTracking ? "text-green-400" : "text-red-400"}`}>
+      <p
+        className={`text-sm ${isTracking ? "text-green-400" : "text-red-400"}`}
+      >
         {isTracking ? "Active" : "Inactive"}
       </p>
 
