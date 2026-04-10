@@ -6,7 +6,6 @@
 // - LandingPage is the public entry point
 // - Login/Register added as standalone public routes
 // - /app/* contains all authenticated pages inside <App /> layout
-// - GeoTest remains a temporary dev route
 // -------------------------------------------------------------
 
 import { createBrowserRouter } from "react-router-dom";
@@ -23,8 +22,6 @@ import Contacts from "./pages/Contacts";
 import CheckIns from "./pages/CheckIns";
 import Settings from "./pages/Settings";
 
-// Dev-only testing page
-import GeoTest from "./pages/GeoTest";
 
 // Route protection
 import ProtectedRoute from "./components/auth/ProtectedRoute";
@@ -57,15 +54,6 @@ export const router = createBrowserRouter([
       </PublicRoute>
     ),
   },
-
-  // -------------------------------------------------------------
-  // Development / Testing Route
-  // -------------------------------------------------------------
-  {
-    path: "/geotest",
-    element: <GeoTest />, // Remove before production
-  },
-
   // -------------------------------------------------------------
   // Authenticated App Routes
   // Wrapped inside <App /> layout
