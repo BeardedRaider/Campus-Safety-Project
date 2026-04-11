@@ -34,11 +34,6 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-// -------------------------------
-// TEST MODE: 10 seconds
-// PROD MODE: 15 minutes
-// -------------------------------
-// const INACTIVITY_LIMIT = 10 * 1000; // 10 seconds for testing
 const INACTIVITY_LIMIT = 15 * 60 * 1000; // 15 minutes for production
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -49,51 +44,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const [isTracking, setIsTracking] = useState(false);
   const [sessionExpired, setSessionExpired] = useState(false);
-
   const [lastActivity, setLastActivity] = useState(Date.now());
 
   const isAuthenticated = !!user;
 
-  // -------------------------------------------------------------
-  // Login
-  // -------------------------------------------------------------
   const login = (userData: any) => {
     localStorage.setItem("user", JSON.stringify(userData));
     setUser(userData);
     setLastActivity(Date.now());
   };
 
-  // -------------------------------------------------------------
-  // Logout
-  // -------------------------------------------------------------
   const logout = () => {
     localStorage.removeItem("user");
     setUser(null);
   };
 
-  // -------------------------------------------------------------
-  // Tracking Controls
-  // -------------------------------------------------------------
-  const startTracking = () => {
-    setIsTracking(true);
-  };
+  const startTracking = () => setIsTracking(true);
 
   const stopTracking = () => {
     setIsTracking(false);
-    setLastActivity(Date.now()); // reset timer when tracking stops
+    setLastActivity(Date.now());
   };
 
-  // -------------------------------------------------------------
-  // Inactivity Timer
-  // -------------------------------------------------------------
   useEffect(() => {
     const handleActivity = () => {
-      if (!isTracking) {
-        setLastActivity(Date.now());
-      }
+      if (!isTracking) setLastActivity(Date.now());
     };
 
-    // Listen for user activity
     window.addEventListener("click", handleActivity);
     window.addEventListener("keydown", handleActivity);
     window.addEventListener("scroll", handleActivity);
@@ -101,7 +78,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const interval = setInterval(() => {
       if (!isAuthenticated) return;
-      if (isTracking) return; // Timer paused during tracking
+      if (isTracking) return;
 
       const now = Date.now();
       const inactiveFor = now - lastActivity;
@@ -142,10 +119,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-// -------------------------------------------------------------
-// Hook: useAuth()
-// Purpose: Clean access to auth context
-// -------------------------------------------------------------
 export function useAuth() {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error("useAuth must be used inside <AuthProvider>");
