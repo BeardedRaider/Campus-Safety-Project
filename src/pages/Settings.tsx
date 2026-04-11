@@ -7,7 +7,6 @@
 // - SettingsField
 // - AnimatedButton
 //
-// Clean, modular, scalable.
 // -------------------------------------------------------------
 
 import PageContainer from "../components/PageContainer";
@@ -17,18 +16,38 @@ import SettingsField from "../components/settings/SettingsField";
 import SettingsSectionHeader from "../components/settings/SettingsSectionHeader";
 import AnimatedButton from "../components/ui/AnimatedButton";
 import { Save } from "lucide-react";
+import { useAuth } from "../context/AuthProvider"; // NEW
 
 export default function Settings() {
   const { settings, saveSettings } = useSettings();
+  const { user } = useAuth(); // NEW
 
-  // Load contacts
+  // -------------------------------------------------------------
+  // Load contacts (per‑user)
+  // -------------------------------------------------------------
   const [contacts, setContacts] = useState<{ id: string; name: string }[]>([]);
-  useEffect(() => {
-    const stored = localStorage.getItem("contacts");
-    if (stored) setContacts(JSON.parse(stored));
-  }, []);
 
+  useEffect(() => {
+    if (!user) return;
+
+    const key = `contacts_${user.id}`; // NEW per‑user key
+    const stored = localStorage.getItem(key);
+
+    if (stored) {
+      try {
+        setContacts(JSON.parse(stored));
+      } catch {
+        console.error("Failed to parse contacts for settings");
+        setContacts([]);
+      }
+    } else {
+      setContacts([]); // NEW user → no contacts
+    }
+  }, [user]);
+
+  // -------------------------------------------------------------
   // Local state
+  // -------------------------------------------------------------
   const [trackingInterval, setTrackingInterval] = useState(
     settings.trackingInterval,
   );
@@ -37,14 +56,18 @@ export default function Settings() {
     settings.defaultContactId,
   );
 
+  // -------------------------------------------------------------
   // Sync when settings load
+  // -------------------------------------------------------------
   useEffect(() => {
     setTrackingInterval(settings.trackingInterval);
     setRetryInterval(settings.retryInterval);
     setDefaultContactId(settings.defaultContactId);
   }, [settings]);
 
+  // -------------------------------------------------------------
   // Dropdown options
+  // -------------------------------------------------------------
   const trackingOptions = [
     { label: "10 Sec Test", value: 10 * 1000 },
     { label: "10 minutes", value: 10 * 60 * 1000 },
@@ -67,7 +90,9 @@ export default function Settings() {
     ...contacts.map((c) => ({ label: c.name, value: c.id })),
   ];
 
+  // -------------------------------------------------------------
   // Save animation state
+  // -------------------------------------------------------------
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error] = useState(false);
@@ -88,6 +113,9 @@ export default function Settings() {
     }, 600);
   };
 
+  // -------------------------------------------------------------
+  // Render
+  // -------------------------------------------------------------
   return (
     <PageContainer>
       <h1 className="text-2xl font-bold text-white mb-6">Settings</h1>
