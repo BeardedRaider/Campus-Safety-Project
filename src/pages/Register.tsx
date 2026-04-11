@@ -6,15 +6,14 @@
 import { Lock, Mail, User } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthProvider";
 import { registerUser } from "../services/authService";
 import AuthCard from "../components/auth/AuthCard";
 import AuthInput from "../components/auth/AuthInput";
 import AuthPageWrapper from "../components/auth/AuthPageWrapper";
+import AnimatedButton from "../components/ui/AnimatedButton";
 
 export default function Register() {
   const navigate = useNavigate();
-  const { login } = useAuth();
 
   const [form, setForm] = useState({
     name: "",
@@ -31,9 +30,20 @@ export default function Register() {
     general: "",
   });
 
+  // Animated button states
+  const [isLoading, setIsLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState(false);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
     setErrors({ ...errors, general: "" });
+  };
+
+  const getPasswordStrength = (pw: string) => {
+    if (pw.length < 6) return "Weak";
+    if (pw.length < 10) return "Medium";
+    return "Strong";
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -56,7 +66,7 @@ export default function Register() {
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(form.email)) {
-      newErrors.email = "Enter a valid email.";
+      newErrors.email = "Enter a valid email address.";
       hasError = true;
     }
 
@@ -72,18 +82,35 @@ export default function Register() {
 
     if (hasError) {
       setErrors(newErrors);
+      setError(true);
+      setTimeout(() => setError(false), 1200);
       return;
     }
 
-    const result = registerUser(form.name, form.email, form.password);
+    // Start loading animation
+    setIsLoading(true);
 
-    if (!result.success) {
-      setErrors({ ...newErrors, general: result.message });
-      return;
-    }
+    // Simulate processing delay
+    setTimeout(() => {
+      const result = registerUser(form.name, form.email, form.password);
 
-    login(result.user);
-    navigate("/app");
+      if (!result.success) {
+        setIsLoading(false);
+        setError(true);
+        setErrors({ ...newErrors, general: result.message });
+        setTimeout(() => setError(false), 1200);
+        return;
+      }
+
+      // Success animation
+      setIsLoading(false);
+      setSuccess(true);
+
+      // Wait for full animation to finish before redirect
+      setTimeout(() => {
+        navigate("/login");
+      }, 2200); // full success animation duration
+    }, 800);
   };
 
   return (
@@ -127,16 +154,24 @@ export default function Register() {
             error={errors.email}
           />
 
-          <AuthInput
-            label="Password"
-            name="password"
-            type="password"
-            placeholder="••••••••"
-            icon={<Lock size={18} />}
-            value={form.password}
-            onChange={handleChange}
-            error={errors.password}
-          />
+          <div>
+            <AuthInput
+              label="Password"
+              name="password"
+              type="password"
+              placeholder="••••••••"
+              icon={<Lock size={18} />}
+              value={form.password}
+              onChange={handleChange}
+              error={errors.password}
+            />
+
+            {form.password && (
+              <p className="text-xs text-gray-400 mt-1">
+                Strength: {getPasswordStrength(form.password)}
+              </p>
+            )}
+          </div>
 
           <AuthInput
             label="Confirm Password"
@@ -149,9 +184,16 @@ export default function Register() {
             error={errors.confirm}
           />
 
-          <button type="submit" className="btn-base btn-cyan w-full mt-2">
-            Create Account
-          </button>
+          <AnimatedButton
+            onClick={() => {}}
+            isLoading={isLoading}
+            success={success}
+            error={error}
+            idleText="Create Account"
+            loadingText="Creating account..."
+            successText="Account created!"
+            errorText="Try again"
+          />
         </form>
       </AuthCard>
     </AuthPageWrapper>
