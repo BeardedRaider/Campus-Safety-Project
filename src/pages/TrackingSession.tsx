@@ -4,13 +4,6 @@
 //          points using <TrackingSessionViewer />.
 //
 // Route: /app/tracking-history/:id
-//
-// This page:
-// - Reads the session ID from the URL
-// - Loads the session + points from useTrackingHistory()
-// - Renders TrackingSessionViewer
-// - Handles missing/invalid session IDs
-// - Allows deleting a session (with confirmation)
 // -------------------------------------------------------------
 
 import { useParams, Link, useNavigate } from "react-router-dom";
@@ -25,11 +18,8 @@ export default function TrackingSession() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const {
-    getSessionById,
-    getPointsForSession,
-    deleteSession, // <-- we will add this to useTrackingHistory
-  } = useTrackingHistory();
+  const { getSessionById, getPointsForSession, deleteSession } =
+    useTrackingHistory();
 
   const session = id ? getSessionById(id) : null;
   const points = id ? getPointsForSession(id) : [];
@@ -44,7 +34,6 @@ export default function TrackingSession() {
       <PageContainer>
         <h1 className="text-2xl font-bold text-white mb-1">Tracking Session</h1>
 
-        {/* Back Button */}
         <Link
           to="/app/tracking-history"
           className="flex items-center text-cyan-300 text-sm mb-3 hover:underline"
@@ -81,10 +70,8 @@ export default function TrackingSession() {
 
   return (
     <PageContainer>
-      {/* Title */}
       <h1 className="text-2xl font-bold text-white mb-2">Tracking Session</h1>
 
-      {/* Back Button */}
       <Link
         to="/app/tracking-history"
         className="flex items-center text-cyan-300 text-sm mb-1 hover:underline"
@@ -94,10 +81,8 @@ export default function TrackingSession() {
       </Link>
 
       {/* Header with Delete Button */}
-      <div className="flex items-center justify-between mt-0 pt-0">
-        <div className="mt-0 pt-0">
-          <SettingsSectionHeader title="Session Details" />
-        </div>
+      <div className="flex items-center justify-between mt-0 pt-0 mb-4">
+        <SettingsSectionHeader title="Session Details" />
 
         <button
           onClick={() => setShowConfirm(true)}
@@ -107,12 +92,8 @@ export default function TrackingSession() {
         </button>
       </div>
 
-      {/* Viewer */}
       <TrackingSessionViewer session={session} points={points} />
 
-      {/* ---------------------------------------------------------
-         Delete Confirmation Modal
-      ---------------------------------------------------------- */}
       {showConfirm && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
           <div className="bg-gray-900 p-6 rounded-lg w-80 border border-gray-700">

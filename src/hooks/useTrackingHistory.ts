@@ -176,6 +176,33 @@ export function useTrackingHistory() {
     [],
   );
 
+  // -----------------------------------------------------------
+  // NEW: Get point counts for each session
+  //
+  // Returns:
+  // {
+  //   "sessionId1": 12,
+  //   "sessionId2": 4,
+  //   ...
+  // }
+  //
+  // Used by TrackingHistoryList to show "Points: X"
+  // -----------------------------------------------------------
+  const getPointCounts = useCallback((): Record<string, number> => {
+    const sessions = loadSessions();
+    const points = loadPoints();
+
+    const counts: Record<string, number> = {};
+
+    sessions.forEach((session) => {
+      counts[session.id] = points.filter(
+        (p) => p.sessionId === session.id,
+      ).length;
+    });
+
+    return counts;
+  }, []);
+
   return {
     sessions,
     points,
@@ -186,5 +213,6 @@ export function useTrackingHistory() {
     getSessions,
     getSessionById,
     getPointsForSession,
+    getPointCounts,
   };
 }
