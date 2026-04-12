@@ -5,46 +5,37 @@
 // Features:
 // - Floating + button (same as Contacts)
 // - NewCheckInModal for note + photo
-// - Uses useGeolocation + useCheckIns
+// - Uses useCheckIns for storage
 // - Clean, modular layout
+// - Updated to support animated button inside modal
 // -------------------------------------------------------------
 
 import { useState } from "react";
 import PageContainer from "../components/PageContainer";
-// import { useGeolocation } from "../hooks/useGeolocation";
 import { useCheckIns } from "../hooks/useCheckIns";
 import type { CheckIn } from "../types/CheckIn";
 import CheckInList from "../components/checkins/CheckInList";
 import NewCheckInModal from "../components/checkins/NewCheckInModal";
-import { Plus, Radar, Check, X } from "lucide-react";
+import { Plus } from "lucide-react";
 
 export default function CheckIns() {
-  // const { getCurrentLocation } = useGeolocation();
   const { checkIns, addCheckIn, deleteCheckIn } = useCheckIns();
 
   const [modalOpen, setModalOpen] = useState(false);
 
-  // Animated button states
-  const [isLoading, setIsLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState(false);
-
   // -------------------------------------------------------------
   // Handle creating a new check-in (called by modal)
+  // Returns TRUE or FALSE so the modal can animate success/error
   // -------------------------------------------------------------
   const handleCreateCheckIn = async (data: {
     note: string;
     photo: string | null;
-  }) => {
-    setIsLoading(true);
-
-    // Delay to show animation + allow geolocation to resolve
-    setTimeout(() => {
+  }): Promise<boolean> => {
+    return new Promise((resolve) => {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
           if (!pos?.coords) {
-            setIsLoading(false);
-            setError(true);
+            resolve(false);
             return;
           }
 
@@ -59,22 +50,11 @@ export default function CheckIns() {
           };
 
           addCheckIn(newCheckIn);
-
-          // Close modal
-          setModalOpen(false);
-
-          // Button animation
-          setIsLoading(false);
-          setSuccess(true);
-          setTimeout(() => setSuccess(false), 2000);
+          resolve(true);
         },
-        () => {
-          setIsLoading(false);
-          setError(true);
-          setTimeout(() => setError(false), 2000);
-        },
+        () => resolve(false),
       );
-    }, 500);
+    });
   };
 
   // -------------------------------------------------------------
@@ -101,28 +81,6 @@ export default function CheckIns() {
         onClose={() => setModalOpen(false)}
         onSubmit={handleCreateCheckIn}
       />
-
-      {/* Animated status bubbles */}
-      {isLoading && (
-        <div className="fixed top-20 right-6 bg-cyan-700 text-black p-3 rounded-full shadow-lg flex items-center gap-2">
-          <Radar className="animate-spin-slow" size={20} />
-          Sending...
-        </div>
-      )}
-
-      {success && (
-        <div className="fixed top-20 right-6 bg-green-600 text-black p-3 rounded-full shadow-lg flex items-center gap-2">
-          <Check size={20} />
-          Sent!
-        </div>
-      )}
-
-      {error && (
-        <div className="fixed top-20 right-6 bg-red-600 text-black p-3 rounded-full shadow-lg flex items-center gap-2">
-          <X size={20} />
-          Failed
-        </div>
-      )}
     </PageContainer>
   );
 }

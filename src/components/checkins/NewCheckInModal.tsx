@@ -1,34 +1,22 @@
 // -------------------------------------------------------------
 // Component: NewCheckInModal
-// Purpose: Modal for creating a new check-in.
-//
-// Features:
-// - Note input
-// - Photo capture (via CameraCapture component)
-// - Large preview + retake
-// - Send Check-In button
-// - Cancel button
-//
-// Props:
-// - isOpen: boolean → controls visibility
-// - onClose: () => void → closes modal
-// - onSubmit: (data: { note: string; photo: string | null }) => void
+// Purpose: Modal for creating a new check-in with animated button.
 //
 // Notes:
-// - Updated to use getUserMedia() camera system
-// - Removed double-close bug (modal now closes only in parent)
-// - Matches styling of Contacts modal
-// - Wider modal (max-w-lg) for large photo preview
+// - Uses global AnimatedButton for consistent UX
+// - Modal stays open during loading (no blank modal)
+// - Closes only after success
 // -------------------------------------------------------------
 
 import { X } from "lucide-react";
 import { useState } from "react";
 import CameraCapture from "./CameraCapture";
+import AnimatedButton from "../ui/AnimatedButton";
 
 interface NewCheckInModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: { note: string; photo: string | null }) => void;
+  onSubmit: (data: { note: string; photo: string | null }) => Promise<boolean>;
 }
 
 export default function NewCheckInModal({
@@ -39,19 +27,37 @@ export default function NewCheckInModal({
   const [note, setNote] = useState("");
   const [photo, setPhoto] = useState<string | null>(null);
 
-  // Modal closed → render nothing
+  // Animated button states
+  const [isLoading, setIsLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState(false);
+
   if (!isOpen) return null;
 
   // -------------------------------------------------------------
-  // Handle form submission
-  // - Sends note + photo to parent
-  // - Clears local state
-  // - Parent handles closing + animations
+  // Handle form submission with animation
   // -------------------------------------------------------------
-  const handleSubmit = () => {
-    onSubmit({ note: note.trim(), photo });
-    setNote("");
-    setPhoto(null);
+  const handleSubmit = async () => {
+    setIsLoading(true);
+
+    const ok = await onSubmit({ note: note.trim(), photo });
+
+    if (ok) {
+      setIsLoading(false);
+      setSuccess(true);
+
+      // Close modal after animation
+      setTimeout(() => {
+        setSuccess(false);
+        setNote("");
+        setPhoto(null);
+        onClose();
+      }, 1200);
+    } else {
+      setIsLoading(false);
+      setError(true);
+      setTimeout(() => setError(false), 1500);
+    }
   };
 
   return (
@@ -65,7 +71,6 @@ export default function NewCheckInModal({
           <X size={22} />
         </button>
 
-        {/* Title */}
         <h2 className="text-xl font-semibold mb-4">New Check-In</h2>
 
         {/* Note Input */}
@@ -78,20 +83,26 @@ export default function NewCheckInModal({
           maxLength={120}
         />
 
-        {/* Camera Capture Component */}
+        {/* Camera */}
         <CameraCapture
           photo={photo}
           onPhotoCaptured={(base64) => setPhoto(base64)}
           onClearPhoto={() => setPhoto(null)}
         />
 
-        {/* Submit Button */}
-        <button
-          onClick={handleSubmit}
-          className="w-full mt-6 bg-cyan-500 hover:bg-cyan-400 text-black py-3 rounded-lg font-medium transition"
-        >
-          Send Check-In
-        </button>
+        {/* Animated Send Button */}
+        <div className="mt-6">
+          <AnimatedButton
+            onClick={handleSubmit}
+            isLoading={isLoading}
+            success={success}
+            error={error}
+            idleText="Send Check-In"
+            loadingText="Sending..."
+            successText="Sent!"
+            errorText="Failed"
+          />
+        </div>
       </div>
     </div>
   );
