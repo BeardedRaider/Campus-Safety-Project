@@ -1,21 +1,21 @@
 // -------------------------------------------------------------
-// Component: CameraCapture (getUserMedia version)
-// Purpose: Full camera control with permission handling,
-//          live preview, capture, retake, and compression.
+// Component: CameraCapture
+// Purpose: Full camera control using getUserMedia().
 //
-// Props:
-// - photo: string | null
-// - onPhotoCaptured: (base64: string) => void
-// - onClearPhoto: () => void
+// Features:
+// - Live camera preview (back or front camera)
+// - Round switch-camera button (bottom-center overlay)
+// - Capture photo → compress → return base64
+// - Retake photo
+// - Permission denied fallback UI
 //
 // Notes:
-// - Uses getUserMedia() for real permission prompts.
-// - Shows fallback UI when permission is denied.
-// - Compresses captured image before returning.
+// - Designed for mobile-first modals (max-h-64 preview)
+// - Uses facingMode to switch between cameras
 // -------------------------------------------------------------
 
 import { useEffect, useRef, useState } from "react";
-import { Camera, RefreshCcw, AlertTriangle } from "lucide-react";
+import { Camera, RefreshCcw, AlertTriangle, Repeat } from "lucide-react";
 
 interface CameraCaptureProps {
   photo: string | null;
@@ -29,17 +29,21 @@ export default function CameraCapture({
   onClearPhoto,
 }: CameraCaptureProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
+
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [permissionDenied, setPermissionDenied] = useState(false);
 
+  // Track which camera is active
+  const [useFrontCamera, setUseFrontCamera] = useState(false);
+
   // -------------------------------------------------------------
-  // Request camera access on mount
+  // Start camera stream when component mounts or camera toggles
   // -------------------------------------------------------------
   useEffect(() => {
     const startCamera = async () => {
       try {
         const mediaStream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: "environment" },
+          video: { facingMode: useFrontCamera ? "user" : "environment" },
         });
 
         setStream(mediaStream);
@@ -55,10 +59,11 @@ export default function CameraCapture({
 
     startCamera();
 
+    // Cleanup: stop camera when component unmounts or camera switches
     return () => {
       stream?.getTracks().forEach((track) => track.stop());
     };
-  }, []);
+  }, [useFrontCamera]);
 
   // -------------------------------------------------------------
   // Capture frame → compress → return base64
@@ -75,6 +80,7 @@ export default function CameraCapture({
 
     ctx.drawImage(videoRef.current, 0, 0);
 
+    // Compress to JPEG @ quality 0.6
     const compressed = canvas.toDataURL("image/jpeg", 0.6);
     onPhotoCaptured(compressed);
   };
@@ -103,7 +109,7 @@ export default function CameraCapture({
         <img
           src={photo}
           alt="Captured"
-          className="w-full max-h-48 object-cover rounded-lg border border-cyan-500 shadow-lg"
+          className="w-full max-h-64 object-cover rounded-lg border border-cyan-500 shadow-lg"
         />
 
         <button
@@ -118,17 +124,29 @@ export default function CameraCapture({
   }
 
   // -------------------------------------------------------------
-  // Live camera preview + capture button
+  // Live camera preview + capture + switch camera (round button)
   // -------------------------------------------------------------
   return (
-    <div className="w-full flex flex-col items-center gap-4">
-      <video
-        ref={videoRef}
-        autoPlay
-        playsInline
-        className="w-full rounded-lg border border-cyan-500 shadow-lg"
-      />
+    <div className="w-full flex flex-col items-center gap-4 relative">
+      {/* Live Preview */}
+      <div className="relative w-full">
+        <video
+          ref={videoRef}
+          autoPlay
+          playsInline
+          className="w-full max-h-64 object-cover rounded-lg border border-cyan-500 shadow-lg"
+        />
 
+        {/* Round Switch Camera Button (bottom-center overlay) */}
+        <button
+          onClick={() => setUseFrontCamera((prev) => !prev)}
+          className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-gray-900/80 backdrop-blur px-3 py-3 rounded-full shadow-lg border border-gray-700 hover:bg-gray-800 transition flex items-center justify-center"
+        >
+          <Repeat size={20} className="text-white" />
+        </button>
+      </div>
+
+      {/* Capture Button */}
       <button
         onClick={capturePhoto}
         className="w-full bg-cyan-600 hover:bg-cyan-500 text-black py-3 rounded-lg flex items-center justify-center gap-2 transition"
