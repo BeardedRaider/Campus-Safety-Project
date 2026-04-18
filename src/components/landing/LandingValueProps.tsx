@@ -13,7 +13,7 @@ export default function LandingValueProps() {
   return (
     <section className="px-4 pt-12 pb-16">
       {/* Card container */}
-      <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-6 max-w-md mx-auto space-y-8 shadow-[0_0_20px_rgba(255,255,255,0.05)]">
+      <div className="card max-w-md mx-auto space-y-8">
         {/* Title */}
         <h2 className="section-title neon-cyan-title text-center">
           Your Campus, Your Crew, Your Peace of Mind
