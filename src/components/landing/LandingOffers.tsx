@@ -1,9 +1,5 @@
 // -------------------------------------------------------------
 // Component: LandingOffers (Matches LandingValueProps layout)
-// Purpose:
-// - One unified `.card` container (same as ValueProps)
-// - Arrows + dots outside the card
-// - No overflow, no clipping, no glow issues
 // -------------------------------------------------------------
 
 import { useState } from "react";
@@ -71,43 +67,40 @@ export default function LandingOffers() {
           onClick={goPrev}
           disabled={activeIndex === 0}
           className="
-            absolute -left-6.5 top-1/2 -translate-y-1/2 z-10
-            p-2 rounded-full
-            bg-cyan-400/5
-            border border-cyan-400/20
-            shadow-[0_0_10px_rgba(34,211,238,0.25)]
-            backdrop-blur-sm
-            text-cyan-300
-            disabled:opacity-40 disabled:cursor-default
-          "
+          absolute -left-5 top-1/2 -translate-y-1/2 z-10
+          p-3 rounded-full
+          bg-purple-400/10
+          border border-purple-400/30
+  shadow-[inset_0_0_6px_rgba(0,0,0,0.45),0_0_14px_rgba(168,85,247,0.55)]          backdrop-blur-sm
+          text-purple-300
+          disabled:opacity-40 disabled:cursor-default
+        "
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
 
         {/* Card container — structure as LandingValueProps */}
-        
-          <OfferCard
-            icon={active.icon}
-            title={active.title}
-            description={active.description}
-            color={active.color}
-          />
-        
+
+        <OfferCard
+          icon={active.icon}
+          title={active.title}
+          description={active.description}
+          color={active.color}
+        />
 
         {/* Right arrow */}
         <button
           onClick={goNext}
           disabled={activeIndex === cards.length - 1}
           className="
-            absolute -right-6.5 top-1/2 -translate-y-1/2 z-10
-            p-2 rounded-full
-            bg-cyan-400/5
-            border border-cyan-400/20
-            shadow-[0_0_10px_rgba(34,211,238,0.25)]
-            backdrop-blur-sm
-            text-cyan-300
-            disabled:opacity-40 disabled:cursor-default
-          "
+          absolute -right-5 top-1/2 -translate-y-1/2 z-10
+          p-3 rounded-full
+          bg-purple-400/10
+          border border-purple-400/30
+  shadow-[inset_0_0_6px_rgba(0,0,0,0.45),0_0_14px_rgba(168,85,247,0.55)]          backdrop-blur-sm
+          text-purple-300
+          disabled:opacity-40 disabled:cursor-default
+        "
         >
           <ChevronRight className="w-5 h-5" />
         </button>
