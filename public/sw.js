@@ -16,14 +16,22 @@ self.addEventListener("install", (event) => {
   );
 });
 
-// Activate: clear old caches
+// Activate: clear old caches safely
 self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(keys.map((key) => key !== CACHE_NAME && caches.delete(key)))
-    )
+    (async () => {
+      const keys = await caches.keys();
+      await Promise.all(
+        keys.map((key) => key !== CACHE_NAME && caches.delete(key))
+      );
+
+      try {
+        await self.clients.claim();
+      } catch (err) {
+        // Ignore "Only the active worker can claim clients" errors
+      }
+    })()
   );
-  self.clients.claim();
 });
 
 // Fetch: network-first for everything except root files
