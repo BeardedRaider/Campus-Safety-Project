@@ -1,12 +1,35 @@
+/* -------------------------------------------------------------
+   SAFE AREA VARIABLES
+   Pulls the actual device notch + home indicator insets.
+   iOS PWAs rely on these values to avoid UI being hidden.
+-------------------------------------------------------------- */
 :root {
   --safe-top: env(safe-area-inset-top);
   --safe-bottom: env(safe-area-inset-bottom);
 }
 
+/* -------------------------------------------------------------
+   SAFE AREA TOP
+   IMPORTANT:
+   - This padding pushes the UI down so it doesn't sit under
+     the notch or status bar.
+   - The background MUST be a SOLID color (not a gradient).
+     iOS does NOT render gradients behind the notch.
+-------------------------------------------------------------- */
 .safe-top {
   padding-top: var(--safe-top);
+  background-color: #0a0f1f !important;
+  /* Solid navy behind notch */
 }
 
+/* -------------------------------------------------------------
+   SAFE AREA BOTTOM
+   IMPORTANT:
+   - Prevents UI from sitting under the home indicator.
+   - Also must use a SOLID background color.
+-------------------------------------------------------------- */
 .safe-bottom {
   padding-bottom: var(--safe-bottom);
+  background-color: #0a0f1f !important;
+  /* Solid navy behind home bar */
 }
