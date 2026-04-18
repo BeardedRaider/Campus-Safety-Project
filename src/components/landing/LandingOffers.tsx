@@ -1,8 +1,10 @@
 // -------------------------------------------------------------
-// Component: LandingOffers (Matches LandingValueProps layout)
+// Component: LandingOffers
+// Purpose: Displays a horizontally swipeable carousel of offer
+//          cards with arrows and pagination indicators.
 // -------------------------------------------------------------
 
-import { useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import {
   GraduationCap,
   Shield,
@@ -13,6 +15,7 @@ import {
 } from "lucide-react";
 import OfferCard from "./OfferCard";
 
+// Data for each slide in the carousel
 const cards = [
   {
     icon: GraduationCap,
@@ -42,12 +45,41 @@ const cards = [
 ];
 
 export default function LandingOffers() {
+  // Reference to the scrollable container
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Tracks which slide is currently centered
   const [activeIndex, setActiveIndex] = useState(0);
 
-  const goPrev = () => setActiveIndex((i) => Math.max(i - 1, 0));
-  const goNext = () => setActiveIndex((i) => Math.min(i + 1, cards.length - 1));
+  // -------------------------------------------------------------
+  // Effect: Update activeIndex when the user scrolls manually.
+  // -------------------------------------------------------------
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
 
-  const active = cards[activeIndex];
+    const handler = () => {
+      const index = Math.round(el.scrollLeft / el.clientWidth);
+      setActiveIndex(index);
+    };
+
+    el.addEventListener("scroll", handler);
+    return () => el.removeEventListener("scroll", handler);
+  }, []);
+
+  // -------------------------------------------------------------
+  // Scrolls to a specific slide programmatically.
+  // Used by arrow buttons and pagination dots.
+  // -------------------------------------------------------------
+  const scrollTo = (index: number) => {
+    const el = scrollRef.current;
+    if (!el) return;
+
+    el.scrollTo({
+      left: index * el.clientWidth,
+      behavior: "smooth",
+    });
+  };
 
   return (
     <section className="pt-12 pb-16 px-4">
@@ -56,62 +88,91 @@ export default function LandingOffers() {
         What's Happening on Campus
       </h2>
 
+      {/* Section description */}
       <p className="text-gray-300 text-center max-w-md mx-auto mb-10 leading-relaxed">
         Everything you need to make the most of student life.
       </p>
 
-      {/* Arrows + Card */}
-      <div className="relative max-w-md mx-auto">
+      {/* ---------------------------------------------------------
+         Carousel container (arrows + scrollable track)
+         --------------------------------------------------------- */}
+      <div className="relative w-full mx-auto">
         {/* Left arrow */}
         <button
-          onClick={goPrev}
+          onClick={() => scrollTo(Math.max(activeIndex - 1, 0))}
           disabled={activeIndex === 0}
           className="
-          absolute -left-5 top-1/2 -translate-y-1/2 z-10
-          p-3 rounded-full
-          bg-purple-400/10
-          border border-purple-400/30
-  shadow-[inset_0_0_6px_rgba(0,0,0,0.45),0_0_14px_rgba(168,85,247,0.55)]          backdrop-blur-sm
-          text-purple-300
-          disabled:opacity-40 disabled:cursor-default
-        "
+            absolute top-1/2 -translate-y-1/2 z-20
+            p-3 left-0 rounded-full
+            bg-purple-400/10
+            border border-purple-400/30
+            shadow-[inset_0_0_8px_rgba(0,0,0,0.2),0_0_18px_rgba(168,85,247,0.65)]
+            backdrop-blur-sm
+            text-purple-300
+            disabled:opacity-40 disabled:cursor-default
+          "
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
 
-        {/* Card container — structure as LandingValueProps */}
-
-        <OfferCard
-          icon={active.icon}
-          title={active.title}
-          description={active.description}
-          color={active.color}
-        />
+        {/* ---------------------------------------------------------
+           Scrollable track
+           - Uses snap-x + snap-center for native swipe feel.
+           - Each slide centers itself in the viewport.
+           --------------------------------------------------------- */}
+        <div
+          ref={scrollRef}
+          className="
+            flex overflow-x-auto snap-x snap-mandatory scroll-smooth scrollbar-hide
+          "
+          style={{ scrollSnapType: "x mandatory" }}
+        >
+          {cards.map((card, i) => (
+            <div
+              key={i}
+              className="
+                w-full shrink-0 snap-center
+                flex justify-center
+              "
+            >
+              {/* 
+                Vertical padding ensures the glow isn't clipped
+                by the section above or below.
+              */}
+              <div className="w-[94%] max-w-md px-2 py-4">
+                <OfferCard {...card} />
+              </div>
+            </div>
+          ))}
+        </div>
 
         {/* Right arrow */}
         <button
-          onClick={goNext}
+          onClick={() => scrollTo(Math.min(activeIndex + 1, cards.length - 1))}
           disabled={activeIndex === cards.length - 1}
           className="
-          absolute -right-5 top-1/2 -translate-y-1/2 z-10
-          p-3 rounded-full
-          bg-purple-400/10
-          border border-purple-400/30
-  shadow-[inset_0_0_6px_rgba(0,0,0,0.45),0_0_14px_rgba(168,85,247,0.55)]          backdrop-blur-sm
-          text-purple-300
-          disabled:opacity-40 disabled:cursor-default
-        "
+            absolute right-0 top-1/2 -translate-y-1/2 z-20
+            p-3 rounded-full
+            bg-purple-400/10
+            border border-purple-400/30
+            shadow-[inset_0_0_8px_rgba(0,0,0,0.2),0_0_18px_rgba(168,85,247,0.65)]
+            backdrop-blur-sm
+            text-purple-300
+            disabled:opacity-40 disabled:cursor-default
+          "
         >
           <ChevronRight className="w-5 h-5" />
         </button>
       </div>
 
-      {/* Pagination dots */}
+      {/* ---------------------------------------------------------
+         Pagination dots
+         --------------------------------------------------------- */}
       <div className="flex justify-center mt-4 gap-2">
         {cards.map((_, i) => (
           <button
             key={i}
-            onClick={() => setActiveIndex(i)}
+            onClick={() => scrollTo(i)}
             className={`
               h-2 w-2 rounded-full transition-all
               ${i === activeIndex ? "bg-cyan-300" : "bg-gray-600"}
