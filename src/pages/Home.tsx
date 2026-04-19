@@ -20,8 +20,6 @@ import TrackingButtons from "../components/home/TrackingButtons";
 // ⭐ GLOBAL tracking engine (the correct one)
 import { useTrackingContext } from "../context/TrackingProvider";
 
-import { useAuth } from "../context/AuthProvider";
-
 export default function Home() {
   // ⭐ Pull tracking state from the global provider
   const {
@@ -33,8 +31,7 @@ export default function Home() {
     activeSession,
   } = useTrackingContext();
 
-  const { startTracking: authStartTracking, stopTracking: authStopTracking } =
-    useAuth();
+
 
   // -------------------------------------------------------------
   // Tracking Ready Indicator
@@ -53,12 +50,10 @@ export default function Home() {
   // -------------------------------------------------------------
   const handleStartTracking = () => {
     trackingStart(); // ⭐ global engine
-    authStartTracking();
   };
 
   const handleStopTracking = () => {
     trackingStop(); // ⭐ global engine
-    authStopTracking();
   };
 
   return (

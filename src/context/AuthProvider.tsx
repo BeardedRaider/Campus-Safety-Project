@@ -1,20 +1,22 @@
 // -------------------------------------------------------------
-// AuthProvider
-// Purpose: Global authentication + session management system.
-//
-// Features:
-// - Stores user state
-// - Handles login + logout
-// - Auto-logout after inactivity (10s test mode)
-// - Pauses inactivity timer while tracking is active
-// - Shows neon "Session Expired" modal
-// - Exposes startTracking() / stopTracking()
-//
-// Notes:
-// - Switch INACTIVITY_LIMIT to 15 * 60 * 1000 for production
+// AuthProvider (FINAL, MOBILE-FIRST, NON-REACTIVE)
+// -------------------------------------------------------------
+// Fixes:
+// - Removes mousemove + keydown spam
+// - Prevents re-renders on every activity event
+// - Uses refs instead of state for lastActivity
+// - Prevents TrackingProvider from resetting
+// - Keeps auto-logout working
+// - Mobile-first activity detection
 // -------------------------------------------------------------
 
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 interface AuthContextType {
   user: any;
@@ -27,31 +29,50 @@ interface AuthContextType {
   startTracking: () => void;
   stopTracking: () => void;
 
-  // Modal
+  // Session expired modal
   sessionExpired: boolean;
   closeSessionExpired: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-const INACTIVITY_LIMIT = 15 * 60 * 1000; // 15 minutes for production
+// 15 minutes for production
+const INACTIVITY_LIMIT = 15 * 60 * 1000;
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  // -------------------------------------------------------------
+  // User state
+  // -------------------------------------------------------------
   const [user, setUser] = useState<any>(() => {
     const stored = localStorage.getItem("user");
     return stored ? JSON.parse(stored) : null;
   });
 
-  const [isTracking, setIsTracking] = useState(false);
-  const [sessionExpired, setSessionExpired] = useState(false);
-  const [lastActivity, setLastActivity] = useState(Date.now());
-
   const isAuthenticated = !!user;
 
+  // -------------------------------------------------------------
+  // Tracking state
+  // -------------------------------------------------------------
+  const [isTracking, setIsTracking] = useState(false);
+
+  // -------------------------------------------------------------
+  // Session expired modal
+  // -------------------------------------------------------------
+  const [sessionExpired, setSessionExpired] = useState(false);
+
+  // -------------------------------------------------------------
+  // ⭐ lastActivity stored in a REF (NOT state)
+  // This prevents re-renders on every activity event.
+  // -------------------------------------------------------------
+  const lastActivityRef = useRef(Date.now());
+
+  // -------------------------------------------------------------
+  // Auth actions
+  // -------------------------------------------------------------
   const login = (userData: any) => {
     localStorage.setItem("user", JSON.stringify(userData));
     setUser(userData);
-    setLastActivity(Date.now());
+    lastActivityRef.current = Date.now();
   };
 
   const logout = () => {
@@ -59,29 +80,53 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
   };
 
-  const startTracking = () => setIsTracking(true);
+  const startTracking = () => {
+    setIsTracking(true);
+  };
 
   const stopTracking = () => {
     setIsTracking(false);
-    setLastActivity(Date.now());
+    lastActivityRef.current = Date.now();
   };
 
+  // -------------------------------------------------------------
+  // ⭐ MOBILE-FIRST ACTIVITY LISTENERS
+  // These DO NOT cause re-renders.
+  // -------------------------------------------------------------
   useEffect(() => {
     const handleActivity = () => {
-      if (!isTracking) setLastActivity(Date.now());
+      if (!isTracking) {
+        lastActivityRef.current = Date.now();
+      }
     };
 
-    window.addEventListener("click", handleActivity);
-    window.addEventListener("keydown", handleActivity);
+    // Mobile-first events
+    window.addEventListener("touchstart", handleActivity);
+    window.addEventListener("touchend", handleActivity);
+    window.addEventListener("touchmove", handleActivity);
     window.addEventListener("scroll", handleActivity);
-    window.addEventListener("mousemove", handleActivity);
+    window.addEventListener("click", handleActivity); // taps count as clicks
 
+    return () => {
+      window.removeEventListener("touchstart", handleActivity);
+      window.removeEventListener("touchend", handleActivity);
+      window.removeEventListener("touchmove", handleActivity);
+      window.removeEventListener("scroll", handleActivity);
+      window.removeEventListener("click", handleActivity);
+    };
+  }, [isTracking]);
+
+  // -------------------------------------------------------------
+  // ⭐ INACTIVITY CHECK LOOP (runs every second)
+  // Uses refs → NO re-renders
+  // -------------------------------------------------------------
+  useEffect(() => {
     const interval = setInterval(() => {
       if (!isAuthenticated) return;
-      if (isTracking) return;
+      if (isTracking) return; // tracking pauses inactivity timer
 
       const now = Date.now();
-      const inactiveFor = now - lastActivity;
+      const inactiveFor = now - lastActivityRef.current;
 
       if (inactiveFor >= INACTIVITY_LIMIT) {
         setSessionExpired(true);
@@ -89,14 +134,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     }, 1000);
 
-    return () => {
-      window.removeEventListener("click", handleActivity);
-      window.removeEventListener("keydown", handleActivity);
-      window.removeEventListener("scroll", handleActivity);
-      window.removeEventListener("mousemove", handleActivity);
-      clearInterval(interval);
-    };
-  }, [isAuthenticated, isTracking, lastActivity]);
+    return () => clearInterval(interval);
+  }, [isAuthenticated, isTracking]);
 
   const closeSessionExpired = () => setSessionExpired(false);
 
