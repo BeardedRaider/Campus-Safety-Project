@@ -2,10 +2,8 @@
 // Page: Home Dashboard
 // Purpose: Main landing page showing stats, location, and actions.
 //
-// Updates:
-// - Adds a "Tracking Ready" indicator to show when geolocation
-//   is available BEFORE the user starts tracking.
-// - Clean Mosh-style comments.
+// Uses ONLY the global TrackingProvider.
+// Tracking now persists across ALL pages.
 // -------------------------------------------------------------
 
 import { useEffect, useState } from "react";
@@ -19,17 +17,20 @@ import SafetyTip from "../components/ui/SafetyTip";
 
 import TrackingButtons from "../components/home/TrackingButtons";
 
+// ⭐ GLOBAL tracking engine (the correct one)
 import { useTrackingContext } from "../context/TrackingProvider";
+
 import { useAuth } from "../context/AuthProvider";
 
 export default function Home() {
+  // ⭐ Pull tracking state from the global provider
   const {
     isTracking,
     position,
     lastUpdated,
-    activeSession,
     startTracking: trackingStart,
     stopTracking: trackingStop,
+    activeSession,
   } = useTrackingContext();
 
   const { startTracking: authStartTracking, stopTracking: authStopTracking } =
@@ -37,10 +38,6 @@ export default function Home() {
 
   // -------------------------------------------------------------
   // Tracking Ready Indicator
-  //
-  // Why this exists:
-  // - iOS PWAs sometimes delay geolocation availability on first load.
-  // - This indicator shows the user when geolocation is ready.
   // -------------------------------------------------------------
   const [trackingReady, setTrackingReady] = useState(false);
 
@@ -55,12 +52,12 @@ export default function Home() {
   // Start/Stop handlers
   // -------------------------------------------------------------
   const handleStartTracking = () => {
-    trackingStart();
+    trackingStart(); // ⭐ global engine
     authStartTracking();
   };
 
   const handleStopTracking = () => {
-    trackingStop();
+    trackingStop(); // ⭐ global engine
     authStopTracking();
   };
 

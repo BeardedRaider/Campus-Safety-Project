@@ -2,10 +2,11 @@
 // Router Configuration
 // Purpose: Defines all public + authenticated routes.
 //
-// Notes:
-// - LandingPage is the public entry point
-// - Login/Register added as standalone public routes
-// - /app/* contains all authenticated pages inside <App /> layout
+// FIXED:
+// - Router instance is now STABLE (created once only)
+// - Prevents Vite HMR from recreating the router on navigation
+// - Prevents full React remounts
+// - Prevents TrackingProvider subtree from resetting
 // -------------------------------------------------------------
 
 import { createBrowserRouter } from "react-router-dom";
@@ -28,18 +29,22 @@ import TrackingSession from "./pages/TrackingSession";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import PublicRoute from "./components/auth/PublicRoute";
 
-// NEW: 404 page
+// 404 page
 import NotFoundPage from "./pages/NotFoundPage";
 
-export const router = createBrowserRouter([
+// -------------------------------------------------------------
+// ⭐ STABLE ROUTER INSTANCE ⭐
+// TypeScript-safe, Vite-safe, React Router-safe.
+// -------------------------------------------------------------
+
+const routes = [
+  // -----------------------------------------------------------
+  // Public Routes
+  // -----------------------------------------------------------
   {
     path: "/",
     element: <LandingPage />,
   },
-
-  // -------------------------------------------------------------
-  // Authentication Routes (Public)
-  // -------------------------------------------------------------
   {
     path: "/login",
     element: (
@@ -57,10 +62,10 @@ export const router = createBrowserRouter([
     ),
   },
 
-  // -------------------------------------------------------------
+  // -----------------------------------------------------------
   // Authenticated App Routes
   // Wrapped inside <App /> layout
-  // -------------------------------------------------------------
+  // -----------------------------------------------------------
   {
     path: "/app",
     element: (
@@ -78,14 +83,16 @@ export const router = createBrowserRouter([
     ],
   },
 
-  // -------------------------------------------------------------
-  // Catch-all route (404)
-  // Purpose:
-  // - Handles any route that doesn't match above
-  // - Shows the custom NotFoundPage
-  // -------------------------------------------------------------
+  // -----------------------------------------------------------
+  // Catch-all Route (404)
+  // -----------------------------------------------------------
   {
     path: "*",
     element: <NotFoundPage />,
   },
-]);
+];
+
+// -------------------------------------------------------------
+// Create router ONCE and export it
+// -------------------------------------------------------------
+export const router = createBrowserRouter(routes);

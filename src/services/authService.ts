@@ -7,9 +7,8 @@
 // - Hardcoded test user for quick login
 // - Real user registration stored in localStorage
 // - Real login checking both test user and stored users
-// -------------------------------------------------------------
-
-// -------------------------------------------------------------
+// 
+// ----------------------------------------------------------
 // 1. Hardcoded test user (for development)
 // -------------------------------------------------------------
 export const testUser = {
