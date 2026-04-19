@@ -2,16 +2,11 @@
 // Component: CameraCapture
 // Purpose: Full camera control using getUserMedia().
 //
-// Features:
-// - Live camera preview (back or front camera)
-// - Round switch-camera button (bottom-center overlay)
-// - Capture photo → compress → return base64
-// - Retake photo
-// - Permission denied fallback UI
-//
-// Notes:
-// - Designed for mobile-first modals (max-h-64 preview)
-// - Uses facingMode to switch between cameras
+// Fixes Added:
+// - Camera stream now STOPS immediately after capturing a photo
+// - Camera only runs when previewing live or retaking
+// - Prevents repeated permission prompts on iOS/Android
+// - Prevents background camera usage (green dot stays off)
 // -------------------------------------------------------------
 
 import { useEffect, useRef, useState } from "react";
@@ -37,9 +32,21 @@ export default function CameraCapture({
   const [useFrontCamera, setUseFrontCamera] = useState(false);
 
   // -------------------------------------------------------------
+  // Helper: Stop all camera tracks cleanly
+  // -------------------------------------------------------------
+  const stopStream = () => {
+    if (stream) {
+      stream.getTracks().forEach((track) => track.stop());
+    }
+  };
+
+  // -------------------------------------------------------------
   // Start camera stream when component mounts or camera toggles
   // -------------------------------------------------------------
   useEffect(() => {
+    // If a photo is already taken, DO NOT start the camera
+    if (photo) return;
+
     const startCamera = async () => {
       try {
         const mediaStream = await navigator.mediaDevices.getUserMedia({
@@ -60,13 +67,11 @@ export default function CameraCapture({
     startCamera();
 
     // Cleanup: stop camera when component unmounts or camera switches
-    return () => {
-      stream?.getTracks().forEach((track) => track.stop());
-    };
-  }, [useFrontCamera]);
+    return () => stopStream();
+  }, [useFrontCamera, photo]);
 
   // -------------------------------------------------------------
-  // Capture frame → compress → return base64
+  // Capture frame → compress → stop camera → return base64
   // -------------------------------------------------------------
   const capturePhoto = () => {
     if (!videoRef.current) return;
@@ -82,6 +87,10 @@ export default function CameraCapture({
 
     // Compress to JPEG @ quality 0.6
     const compressed = canvas.toDataURL("image/jpeg", 0.6);
+
+    // Stop camera immediately after capture
+    stopStream();
+
     onPhotoCaptured(compressed);
   };
 
@@ -113,7 +122,11 @@ export default function CameraCapture({
         />
 
         <button
-          onClick={onClearPhoto}
+          onClick={() => {
+            onClearPhoto();
+            setPermissionDenied(false);
+            // Camera will restart automatically via useEffect
+          }}
           className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg flex items-center gap-2 transition"
         >
           <RefreshCcw size={18} />
