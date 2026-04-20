@@ -1,14 +1,3 @@
-// -------------------------------------------------------------
-// Component: TrackingHistoryList
-// Purpose: Render a list of tracking sessions using
-//          <TrackingSessionCard />.
-//
-// Updated:
-// - Handles delete modal + delete logic
-// - Passes onDelete to each card
-// - Added duration formatting using formatDuration()
-// -------------------------------------------------------------
-
 import { useState } from "react";
 import type { TrackingSession } from "../../hooks/useTrackingHistory";
 import { useTrackingHistory } from "../../hooks/useTrackingHistory";
@@ -24,7 +13,8 @@ export default function TrackingHistoryList({
   sessions,
   pointCounts,
 }: TrackingHistoryListProps) {
-  const { deleteSession, getSessions, getPointCounts } = useTrackingHistory();
+  const { deleteSession, getSessions, getPointCounts, getPointsForSession } =
+    useTrackingHistory();
 
   const [showConfirm, setShowConfirm] = useState(false);
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
@@ -32,19 +22,16 @@ export default function TrackingHistoryList({
   const [localSessions, setLocalSessions] = useState(sessions);
   const [localPointCounts, setLocalPointCounts] = useState(pointCounts);
 
-  // Trigger delete modal
   const requestDelete = (id: string) => {
     setPendingDeleteId(id);
     setShowConfirm(true);
   };
 
-  // Confirm deletion
   const handleDelete = () => {
     if (!pendingDeleteId) return;
 
     deleteSession(pendingDeleteId);
 
-    // Refresh list
     setLocalSessions(getSessions());
     setLocalPointCounts(getPointCounts());
 
@@ -52,7 +39,6 @@ export default function TrackingHistoryList({
     setPendingDeleteId(null);
   };
 
-  // Empty state
   if (localSessions.length === 0) {
     return (
       <p className="text-gray-400 text-sm mt-4">No tracking sessions yet.</p>
@@ -69,19 +55,23 @@ export default function TrackingHistoryList({
 
           const duration = session.endedAt ? formatDuration(durationMs) : "N/A";
 
+          const pointsForSession = getPointsForSession(session.id);
+          const firstPoint = pointsForSession[0];
+
           return (
             <TrackingSessionCard
               key={session.id}
               session={session}
               pointCount={localPointCounts[session.id] ?? 0}
-              duration={duration} // ⭐ NEW
+              duration={duration}
+              startLat={firstPoint?.latitude}
+              startLng={firstPoint?.longitude}
               onDelete={() => requestDelete(session.id)}
             />
           );
         })}
       </div>
 
-      {/* Delete Confirmation Modal */}
       {showConfirm && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
           <div className="bg-gray-900 p-6 rounded-lg w-80 border border-gray-700">

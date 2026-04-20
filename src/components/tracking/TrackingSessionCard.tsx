@@ -1,11 +1,9 @@
 // -------------------------------------------------------------
 // Component: TrackingSessionCard
 // Purpose: Display a single tracking session summary in a card.
-//
-// Updated:
-// - Uses formatted duration passed from parent (m:ss or h m:ss)
-// - Removed old minute-only calculation
-// - Lucide icons + neon theme preserved
+// Now includes:
+// - Start address
+// - Small map thumbnail (non-overlapping)
 // -------------------------------------------------------------
 
 import { Link } from "react-router-dom";
@@ -18,11 +16,15 @@ import {
   Route,
 } from "lucide-react";
 import type { TrackingSession } from "../../hooks/useTrackingHistory";
+import MapPreview from "../maps/MapPreview";
+import { useReverseGeocode } from "../../hooks/useReverseGeocode";
 
 interface TrackingSessionCardProps {
   session: TrackingSession;
   pointCount: number;
-  duration: string; // ⭐ now used
+  duration: string;
+  startLat?: number;
+  startLng?: number;
   onDelete: () => void;
 }
 
@@ -30,6 +32,8 @@ export default function TrackingSessionCard({
   session,
   pointCount,
   duration,
+  startLat,
+  startLng,
   onDelete,
 }: TrackingSessionCardProps) {
   const start = new Date(session.startedAt).toLocaleString();
@@ -37,9 +41,16 @@ export default function TrackingSessionCard({
     ? new Date(session.endedAt).toLocaleString()
     : "Active";
 
+  const hasCoords =
+    typeof startLat === "number" && typeof startLng === "number";
+
+  const address = hasCoords
+    ? useReverseGeocode(startLat!, startLng!)
+    : "Location unavailable";
+
   return (
-    <div className="relative bg-[#0a0f1c] border border-cyan-500 rounded-lg p-4 shadow-md">
-      {/* Delete Icon (top-right) */}
+    <div className="relative bg-[#0a0f1c] border border-cyan-500 rounded-lg p-4 shadow-md pr-28 pb-4">
+      {/* Delete Icon */}
       <button
         onClick={onDelete}
         className="absolute top-3 right-3 text-red-400 hover:text-red-300 transition"
@@ -55,6 +66,14 @@ export default function TrackingSessionCard({
         <h3 className="text-white font-semibold mb-3">Tracking Session</h3>
 
         <div className="text-gray-300 text-sm space-y-2">
+          {/* Location (NEW) */}
+          <p className="flex items-center gap-2">
+            <span className="text-cyan-300 font-medium">Location:</span>
+            <span className="text-gray-300">
+              {hasCoords ? address || "Loading..." : "Location unavailable"}
+            </span>
+          </p>
+
           {/* Started */}
           <p className="flex items-center gap-2">
             <Calendar size={18} className="text-cyan-400" />
@@ -72,7 +91,7 @@ export default function TrackingSessionCard({
             </span>
           </p>
 
-          {/* Duration (formatted m:ss or h m:ss) */}
+          {/* Duration */}
           <p className="flex items-center gap-2">
             <Clock size={18} className="text-[#c7d2e0]" />
             <span>
@@ -98,6 +117,13 @@ export default function TrackingSessionCard({
           </div>
         </div>
       </Link>
+
+      {/* Map Thumbnail (NEW) */}
+      {hasCoords && (
+        <div className="absolute bottom-3 right-3 w-20 h-20 rounded-md overflow-hidden border border-cyan-500 shadow-md">
+          <MapPreview lat={startLat!} lng={startLng!} zoom={16} />
+        </div>
+      )}
     </div>
   );
 }

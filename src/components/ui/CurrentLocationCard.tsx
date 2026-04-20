@@ -4,10 +4,9 @@
 //
 // Updated:
 // - Duration now updates every second (not every minute)
-// - Duration format: m:ss (e.g., 11m:23s)
-// - Uses formatDuration helper
-// - Shows "N/A" when inactive
-// - Consistent neon theme + spacing
+// - Added small map thumbnail (bottom-right)
+// - Added reverse-geocoded address
+// - Coordinates removed (address is cleaner)
 // -------------------------------------------------------------
 
 import { MapPin, Clock } from "lucide-react";
@@ -15,12 +14,14 @@ import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { formatDate } from "../../utils/formatDate";
 import { formatDuration } from "../../utils/formatDuration";
+import MapPreview from "../maps/MapPreview";
+import { useReverseGeocode } from "../../hooks/useReverseGeocode";
 
 interface Props {
   isTracking: boolean;
   position: GeolocationPosition | null;
   lastUpdated: number | null;
-  startedAt: number | null; // needed for duration
+  startedAt: number | null;
 }
 
 export default function CurrentLocationCard({
@@ -30,6 +31,12 @@ export default function CurrentLocationCard({
   startedAt,
 }: Props) {
   const [liveDuration, setLiveDuration] = useState<string>("N/A");
+
+  const lat = position?.coords.latitude;
+  const lng = position?.coords.longitude;
+
+  const address =
+    lat && lng ? useReverseGeocode(lat, lng) : "Location unavailable";
 
   // -------------------------------------------------------------
   // Live duration updater (runs every second while tracking)
@@ -42,18 +49,18 @@ export default function CurrentLocationCard({
 
     const update = () => {
       const ms = Date.now() - startedAt;
-      setLiveDuration(formatDuration(ms)); // now shows m:ss
+      setLiveDuration(formatDuration(ms));
     };
 
-    update(); // run immediately
+    update();
 
-    const interval = setInterval(update, 1000); // update every second
+    const interval = setInterval(update, 1000);
 
     return () => clearInterval(interval);
   }, [isTracking, startedAt]);
 
   return (
-    <div className="card mt-6">
+    <div className="card mt-6 relative overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
@@ -76,30 +83,32 @@ export default function CurrentLocationCard({
         {isTracking ? "Active" : "Inactive"}
       </p>
 
-      {/* Coordinates + Timestamp + Duration */}
-      <div className="mt-2 text-sm text-gray-300">
-        {/* Coordinates */}
-        <p>
-          <span className="text-gray-400">Coordinates:</span>{" "}
-          {position
-            ? `${position.coords.latitude.toFixed(6)}, ${position.coords.longitude.toFixed(6)}`
-            : "N/A"}
-        </p>
+      {/* Address */}
+      <p className="text-sm text-cyan-300 mt-2 pr-24">
+        <span className="text-gray-400">Location:</span>{" "}
+        {address || "Loading..."}
+      </p>
 
-        {/* Last Updated */}
-        <p className="mt-1">
-          <span className="text-gray-400">Last updated:</span>{" "}
-          {formatDate(lastUpdated)}
-        </p>
+      {/* Last Updated */}
+      <p className="text-sm text-gray-300 mt-1">
+        <span className="text-gray-400">Last updated:</span>{" "}
+        {formatDate(lastUpdated)}
+      </p>
 
-        {/* Duration */}
-        <p className="mt-1 flex items-center gap-2">
-          <Clock size={16} className="text-gray-400" />
-          <span>
-            <span className="text-gray-400">Duration:</span> {liveDuration}
-          </span>
-        </p>
-      </div>
+      {/* Duration */}
+      <p className="mt-1 flex items-center gap-2 text-sm text-gray-300">
+        <Clock size={16} className="text-gray-400" />
+        <span>
+          <span className="text-gray-400">Duration:</span> {liveDuration}
+        </span>
+      </p>
+
+      {/* Small Map Thumbnail */}
+      {lat && lng && (
+        <div className="absolute bottom-3 right-3 w-20 h-20 rounded-md overflow-hidden border border-gray-700 shadow-md">
+          <MapPreview lat={lat} lng={lng} zoom={16} />
+        </div>
+      )}
     </div>
   );
 }
